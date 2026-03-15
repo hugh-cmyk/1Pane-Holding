@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1Pane.io | Service monitoring in one dashboard</title>
-  <meta name="description" content="Stop chasing status pages. Monitor websites, APIs and services in one dashboard with 1Pane.io." />
+  <title>1Pane – Monitor websites, APIs and service status in one dashboard</title>
+  <meta name="description" content="1Pane monitors websites, APIs and service providers in one dashboard. Track status pages, infrastructure health and domain configuration before outages affect your users." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://1pane.io" />
+  <meta property="og:title" content="1Pane – Monitor websites, APIs and services in one dashboard" />
+  <meta property="og:description" content="Track service status, infrastructure health and domain configuration before outages affect your users." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://1pane.io" />
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -113,6 +119,56 @@
       opacity: 0.75;
     }
 
+    .seo-section {
+      margin-top: 3rem;
+      text-align: left;
+    }
+
+    .seo-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1a1a1a;
+      margin-bottom: 0.75rem;
+    }
+
+    .seo-section p {
+      font-size: 0.875rem;
+      color: #717171;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .seo-section nav {
+      margin-top: 1.25rem;
+    }
+
+    .seo-section nav p {
+      margin-bottom: 0.4rem;
+    }
+
+    .seo-section nav ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+      margin: 0;
+    }
+
+    .seo-section nav li {
+      font-size: 0.875rem;
+      color: #717171;
+      line-height: 1.7;
+    }
+
+    .seo-section nav a {
+      color: #717171;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .seo-section nav a:hover {
+      color: #1a1a1a;
+    }
+
     @media (max-width: 480px) {
       form {
         flex-direction: column;
@@ -131,7 +187,7 @@
 
     <div class="divider"></div>
 
-    <h1>Stop chasing status pages.</h1>
+    <h1>Stop chasing status pages</h1>
 
     <p class="subline">Monitor websites, APIs and services in one dashboard.</p>
 
@@ -143,6 +199,20 @@
       <input type="email" name="email" id="bd-email" placeholder="Enter your email" required />
       <input type="submit" value="Join early access" />
     </form>
+
+    <div class="seo-section">
+      <h2>Website and API monitoring made simple</h2>
+      <p>1Pane helps teams monitor the services their business depends on. Track website uptime, API health, infrastructure metrics and domain configuration in one place. Instead of checking multiple status pages, 1Pane aggregates service health from providers like AWS, Cloudflare, Stripe and GitHub into a single dashboard.</p>
+      <p>Receive alerts when services degrade, monitor DNS and SSL expiry, and detect infrastructure issues before customers notice them.</p>
+      <nav>
+        <p>Learn more about:</p>
+        <ul>
+          <li><a href="/guides/monitor-dns-health">Monitoring DNS health</a></li>
+          <li><a href="/guides/monitor-ssl-certificate-expiry">Monitoring SSL certificate expiry</a></li>
+          <li><a href="/guides/monitor-api-uptime">Monitoring API uptime</a></li>
+        </ul>
+      </nav>
+    </div>
 
   </div>
 </body>
