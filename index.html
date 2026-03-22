@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1Pane – Monitor websites, APIs and service status in one dashboard</title>
-  <meta name="description" content="1Pane monitors websites, APIs and service providers in one dashboard. Track status pages, infrastructure health and domain configuration before outages affect your users." />
+  <title>1Pane – Website, API and domain health monitoring in one dashboard</title>
+  <meta name="description" content="1Pane monitors your websites, APIs, service providers and domain health in one dashboard. Track uptime, DNS, SSL, SPF and DMARC issues before they affect your users." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://1pane.io" />
-  <meta property="og:title" content="1Pane – Monitor websites, APIs and services in one dashboard" />
-  <meta property="og:description" content="Track service status, infrastructure health and domain configuration before outages affect your users." />
+  <meta property="og:title" content="1Pane – Website, API and domain health monitoring in one dashboard" />
+  <meta property="og:description" content="Monitor uptime, service status, DNS, SSL and email authentication from a single dashboard. Know before your customers do." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://1pane.io" />
   <style>
@@ -29,18 +29,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
-      padding: 3rem 1.5rem;
+      padding: 0 1.5rem;
     }
 
-    .container {
+    .hero {
       max-width: 560px;
       width: 100%;
       text-align: center;
+      padding-top: clamp(4rem, 12vh, 8rem);
     }
 
-    /* Large prominent wordmark */
     .wordmark {
       font-size: clamp(2.25rem, 7.5vw, 3.75rem);
       font-weight: 700;
@@ -119,12 +118,15 @@
       opacity: 0.75;
     }
 
-    .seo-section {
-      margin-top: 3rem;
+    /* Content sections */
+    .content {
+      max-width: 560px;
+      width: 100%;
       text-align: left;
+      padding: 3rem 0 4rem;
     }
 
-    .seo-section h2 {
+    .content h2 {
       font-size: 1rem;
       font-weight: 600;
       letter-spacing: -0.01em;
@@ -132,13 +134,99 @@
       margin-bottom: 0.75rem;
     }
 
-    .seo-section p {
+    .content p {
       font-size: 0.875rem;
       color: #717171;
       line-height: 1.7;
       margin-bottom: 0.75rem;
     }
 
+    /* Feature list */
+    .features {
+      list-style: none;
+      margin: 1rem 0 0;
+      padding: 0;
+    }
+
+    .features li {
+      font-size: 0.875rem;
+      color: #717171;
+      line-height: 1.7;
+      padding: 0.25rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+    }
+
+    .features li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.7rem;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: #d4d4d4;
+    }
+
+    /* Guides section */
+    .guides-section {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .guides-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .guides-grid a {
+      font-size: 0.8125rem;
+      color: #717171;
+      text-decoration: none;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid #f0f0f0;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .guides-grid a:hover {
+      border-color: #d4d4d4;
+      color: #1a1a1a;
+    }
+
+    .guides-all {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: #a3a3a3;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .guides-all:hover {
+      color: #1a1a1a;
+    }
+
+    /* Closing CTA */
+    .closing {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+    }
+
+    .closing p {
+      color: #a3a3a3;
+      text-align: center;
+    }
+
+    .closing form {
+      margin-top: 1rem;
+    }
 
     @media (max-width: 480px) {
       form {
@@ -147,6 +235,10 @@
 
       input[type="submit"] {
         width: 100%;
+      }
+
+      .guides-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -163,15 +255,15 @@
   </script>
 </head>
 <body>
-  <div class="container">
 
+  <!-- Hero -->
+  <div class="hero">
     <p class="wordmark">1Pane.io</p>
-
     <div class="divider"></div>
 
-    <h1>Stop chasing status pages</h1>
+    <h1>One dashboard for uptime, services and domain health</h1>
 
-    <p class="subline">Monitor websites, APIs and services in one dashboard.</p>
+    <p class="subline">Monitor your websites, APIs and infrastructure. Track DNS, SSL and email authentication. Know when something breaks before your customers do.</p>
 
     <form
       action="https://buttondown.com/api/emails/embed-subscribe/user618"
@@ -181,13 +273,52 @@
       <input type="email" name="email" id="bd-email" placeholder="Enter your email" required />
       <input type="submit" value="Join early access" />
     </form>
+  </div>
 
-    <div class="seo-section">
-      <h2>Website and API monitoring made simple</h2>
-      <p>1Pane helps teams monitor the services their business depends on. Track website uptime, API health, infrastructure metrics and domain configuration in one place. Instead of checking multiple status pages, 1Pane aggregates service health from providers like AWS, Cloudflare, Stripe and GitHub into a single dashboard.</p>
-      <p>Receive alerts when services degrade, monitor DNS and SSL expiry, and detect infrastructure issues before customers notice them.</p>
+  <!-- Content -->
+  <div class="content">
+
+    <h2>Website and API monitoring, without the noise</h2>
+    <p>Most teams rely on a patchwork of status pages, uptime checkers and manual DNS lookups to stay on top of their infrastructure. 1Pane brings it together. Monitor website uptime, API health, third-party service status and domain configuration from a single dashboard.</p>
+    <p>1Pane aggregates service health from providers like AWS, Cloudflare, Stripe and GitHub so you can stop switching between tabs and start seeing the full picture.</p>
+
+    <ul class="features">
+      <li>Website and API monitoring with uptime tracking</li>
+      <li>Service status aggregation across cloud providers</li>
+      <li>Domain health monitoring — DNS, SSL certificate expiry, SPF and DMARC</li>
+      <li>Alerts when services degrade or configurations drift</li>
+    </ul>
+
+    <!-- Domain Health Guides -->
+    <div class="guides-section">
+      <h2>Domain health guides</h2>
+      <p>Misconfigured DNS, expired SSL certificates and missing email authentication records cause deliverability failures, security warnings and downtime. These guides explain common domain health issues and how to fix them.</p>
+
+      <div class="guides-grid">
+        <a href="/domain-health/dns-lookup-failed.html">DNS lookup failed</a>
+        <a href="/domain-health/no-a-record.html">No A record found</a>
+        <a href="/domain-health/spf-record-missing.html">SPF record missing</a>
+        <a href="/domain-health/no-dmarc-policy.html">No DMARC policy</a>
+        <a href="/domain-health/ssl-certificate-expired.html">SSL certificate expired</a>
+      </div>
+
+      <a href="/domain-health/index.html" class="guides-all">View all domain health guides →</a>
+    </div>
+
+    <!-- Closing CTA -->
+    <div class="closing">
+      <p>1Pane is in early access. Join the list to get notified when we launch.</p>
+      <form
+        action="https://buttondown.com/api/emails/embed-subscribe/user618"
+        method="post"
+        class="embeddable-buttondown-form"
+      >
+        <input type="email" name="email" placeholder="Enter your email" required />
+        <input type="submit" value="Join early access" />
+      </form>
     </div>
 
   </div>
+
 </body>
 </html>
