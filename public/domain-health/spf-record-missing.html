@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPF Record Missing: What It Means and How to Fix It | 1Pane</title>
+  <meta name="description" content="Your domain has no SPF record, leaving it open to email spoofing, spam filtering, and deliverability problems. Learn what SPF is, how to prevent email spoofing, and how to add an SPF record in under 2 minutes.">
+  <link rel="canonical" href="https://1pane.com/domain-health/spf-record-missing.html">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SPF Record Missing: What It Means and How to Fix It">
+  <meta property="og:description" content="Your domain has no SPF record. Learn what SPF does, why it matters, and how to add one in under 2 minutes.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://1pane.com/domain-health/spf-record-missing.html">
+
+  <!-- Structured data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://1pane.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Domain Health", "item": "https://1pane.com/domain-health/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "SPF Record Missing" }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does 'SPF record missing' mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It means your domain does not have an SPF DNS record. Without one, any mail server can send email claiming to be from your domain, and receiving servers have no way to verify whether the sender is legitimate."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I add an SPF record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add a TXT record at your root domain with the value 'v=spf1 include:_spf.google.com ~all' (replace the include with your email provider). Set the host to '@' and TTL to 3600. It takes about 2 minutes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can a missing SPF record cause emails to go to spam?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Email providers like Google, Microsoft, and Yahoo use SPF as a trust signal when deciding where to deliver messages. A missing SPF record reduces your domain's email authentication score, which can cause legitimate emails to be filtered into spam or junk folders."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between SPF and DMARC?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SPF lists which servers are allowed to send email for your domain. DMARC tells email providers what to do when SPF or DKIM checks fail, and sends you reports. SPF verifies the sender, DMARC enforces the policy. You need both for full email spoofing protection."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I stop someone spoofing my email domain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Set up three DNS records: SPF (to list authorised sending servers), DKIM (to add cryptographic signatures to emails), and DMARC (to tell providers what to do when authentication fails). Together, these three protocols prevent email spoofing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need SPF if I already have DMARC?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. DMARC does not replace SPF. DMARC defines what happens when authentication fails, but it relies on SPF and DKIM to perform the actual checks. Without SPF, DMARC has nothing to enforce on the server verification side."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I have more than one SPF record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Your domain must have exactly one SPF TXT record. If you need to authorise multiple email services, combine them into a single record using multiple include: entries. Having two separate SPF records causes email providers to treat both as invalid."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does SPF take to work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most DNS changes propagate within a few minutes to a few hours. In rare cases, full global propagation can take up to 48 hours. Once the record is live, email providers will start checking it immediately."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to add an SPF record to your domain",
+    "description": "Step-by-step guide to adding an SPF DNS record to protect your domain from email spoofing.",
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-22",
+    "totalTime": "PT2M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Log in to your DNS provider",
+        "text": "Sign in to the DNS management console for your domain (Cloudflare, Route 53, GoDaddy, Namecheap, etc.)."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Navigate to DNS records",
+        "text": "Open the DNS records section for the domain you want to protect."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add a TXT record",
+        "text": "Create a new TXT record with the host '@' and the value 'v=spf1 include:_spf.google.com ~all' (replace the include with your email provider). Set TTL to 3600."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Verify the record",
+        "text": "Wait for DNS propagation (usually a few minutes to a few hours), then verify using an SPF lookup tool or 1Pane domain health scan."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Tighten your policy",
+        "text": "Once you have confirmed all legitimate senders are included, consider changing ~all (soft fail) to -all (hard fail) for stricter enforcement."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #999; margin-bottom: 24px; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a2e; text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .updated-date { font-size: 13px; color: #999; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 20px; line-height: 1.3; }
+    .lead { font-size: 17px; color: #555; margin-bottom: 12px; }
+    .fix-summary {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e40af;
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+    }
+    h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 16px; color: #333; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #333; }
+    li { margin-bottom: 8px; }
+    a { color: #1e40af; }
+    a:hover { text-decoration: none; }
+    .code-block {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-inline {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+    .callout {
+      background: #f0f7ff;
+      border-left: 3px solid #3b82f6;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    .callout p { margin-bottom: 0; color: #1e40af; }
+
+    /* Quick fix box */
+    .quick-fix {
+      background: #fff;
+      border: 2px solid #183D9C;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0 40px;
+    }
+    .quick-fix-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .quick-fix-badge {
+      background: #183D9C;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quick-fix-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .quick-fix ol { margin-bottom: 0; }
+
+    /* Visual diagrams */
+    .diagram {
+      margin: 28px 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .diagram-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      padding: 14px 20px 0;
+    }
+    .diagram-content {
+      padding: 20px;
+    }
+
+    /* DNS record visual */
+    .dns-record-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .dns-record-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e5e5e5;
+      font-weight: 600;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .dns-record-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      color: #333;
+    }
+    .dns-record-table tr:last-child td { border-bottom: none; }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .flow-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-icon-blue { background: #eff6ff; color: #1e40af; }
+    .flow-icon-green { background: #f0fdf4; color: #16a34a; }
+    .flow-icon-red { background: #fef2f2; color: #dc2626; }
+    .flow-icon-amber { background: #fffbeb; color: #d97706; }
+    .flow-text { font-size: 14px; color: #333; }
+    .flow-text strong { color: #1a1a2e; }
+    .flow-arrow { color: #ccc; font-size: 18px; text-align: center; width: 100%; }
+
+    /* Include examples table */
+    .include-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 20px 0;
+    }
+    .include-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e5e5e5;
+      font-weight: 600;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .include-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+    }
+    .include-table td:first-child { font-weight: 600; color: #1a1a2e; }
+    .include-table td:last-child {
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+    }
+    .include-table tr:last-child td { border-bottom: none; }
+
+    /* Simple explanation */
+    .simple-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .simple-box ul { margin-bottom: 0; }
+    .simple-box li { font-size: 15px; }
+    .simple-check { color: #16a34a; }
+    .simple-cross { color: #dc2626; }
+    .simple-warn { color: #d97706; }
+
+    /* Without vs with */
+    .versus-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    @media (min-width: 540px) {
+      .versus-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .versus-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+    }
+    .versus-card-bad { background: #fef2f2; border-color: #fecaca; }
+    .versus-card-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .versus-card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; }
+    .versus-card ul { margin-bottom: 0; padding-left: 20px; }
+    .versus-card li { font-size: 14px; margin-bottom: 6px; }
+    .versus-card-bad h3 { color: #991b1b; }
+    .versus-card-bad li { color: #7f1d1d; }
+    .versus-card-good h3 { color: #166534; }
+    .versus-card-good li { color: #14532d; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 32px 0 40px;
+    }
+    .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: #1e40af; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Related issues */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (min-width: 540px) {
+      .related-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .related-card {
+      display: block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .related-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .related-card .rc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .related-card .rc-desc { font-size: 13px; color: #666; }
+
+    .cta-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .cta-box p { color: #555; margin-bottom: 16px; }
+    .cta-button {
+      display: inline-block;
+      background: #183D9C;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .cta-button:hover { background: #153580; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 16px 60px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 19px; margin-top: 36px; }
+      .quick-fix { padding: 16px; }
+      .dns-record-table td, .dns-record-table th { padding: 6px 8px; font-size: 12px; }
+      .include-table td, .include-table th { padding: 6px 8px; font-size: 12px; }
+      .flow-step { gap: 8px; }
+      .versus-card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/domain-health/index.html">Domain Health</a>
+      <span class="sep">/</span>
+      <span>SPF Record Missing</span>
+    </nav>
+
+    <article>
+    <p class="updated-date">Last updated: <time datetime="2026-03-22">22 March 2026</time></p>
+
+    <h1>SPF record missing: what it means and how to fix it</h1>
+
+    <!-- Featured snippet target -->
+    <p class="lead">
+      A missing SPF record means any mail server can send email claiming to be from your domain. This
+      is one of the most common reasons emails go to spam, email authentication fails, and domains
+      become vulnerable to spoofing. Without SPF, providers like Google and Microsoft have no way to
+      verify your legitimate emails, hurting both deliverability and trust.
+    </p>
+
+    <div class="fix-summary">
+      <strong>Fix:</strong> Add a TXT record at your root domain with the value
+      <span class="code-inline">v=spf1 include:_spf.google.com ~all</span>
+      (replace the include with your email provider). It takes about 2 minutes.
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#quick-fix">Quick fix (2 minutes)</a></li>
+        <li><a href="#what-is-spf">What is SPF</a></li>
+        <li><a href="#what-it-looks-like">What an SPF record looks like</a></li>
+        <li><a href="#simple-explanation">How to think about SPF (simple explanation)</a></li>
+        <li><a href="#without-vs-with">Without vs with SPF</a></li>
+        <li><a href="#why-it-matters">Why this matters</a></li>
+        <li><a href="#is-this-your-issue">How to tell if this is your issue</a></li>
+        <li><a href="#when-it-becomes-a-problem">When this becomes a problem</a></li>
+        <li><a href="#how-to-fix">How to fix it properly</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+        <li><a href="#how-1pane-detects">How 1Pane detects this</a></li>
+        <li><a href="#faq">Frequently asked questions</a></li>
+        <li><a href="#related-issues">Related issues</a></li>
+      </ul>
+    </nav>
+
+    <!-- Quick fix -->
+    <div class="quick-fix" id="quick-fix">
+      <div class="quick-fix-header">
+        <span class="quick-fix-badge">Quick fix</span>
+        <span class="quick-fix-title">Add an SPF record in 2 minutes</span>
+      </div>
+      <ol>
+        <li>Log in to your DNS provider (Cloudflare, Route 53, GoDaddy, Namecheap, or similar).</li>
+        <li>Go to the DNS records section for your domain.</li>
+        <li>Add a new <strong>TXT</strong> record:</li>
+      </ol>
+      <ul>
+        <li><strong>Host / Name:</strong> <span class="code-inline">@</span> (or leave blank, depending on your provider)</li>
+        <li><strong>Type:</strong> TXT</li>
+        <li><strong>Value:</strong></li>
+      </ul>
+      <div class="code-block">v=spf1 include:_spf.google.com ~all</div>
+      <ul>
+        <li><strong>TTL:</strong> 3600 (or your provider's default)</li>
+      </ul>
+      <p style="margin-bottom:0; color: #555; font-size: 14px;">
+        Replace <span class="code-inline">include:_spf.google.com</span> with your email provider's SPF
+        include. See the <a href="#common-includes">common includes table</a> below for other providers.
+        Once added, most domains start seeing improved email trust within hours.
+      </p>
+    </div>
+
+    <!-- What is SPF -->
+    <h2 id="what-is-spf">What is SPF</h2>
+    <p>
+      SPF (Sender Policy Framework) is a DNS TXT record that lists the mail servers authorised to send
+      email on behalf of your domain. When a receiving server gets an email from your domain, it checks
+      the SPF record to verify the sending server is allowed.
+    </p>
+    <p>
+      Think of SPF as a guest list for your domain's email. Only servers on the list are considered
+      legitimate senders. Anyone not on the list is treated as suspicious.
+    </p>
+    <p>
+      SPF works alongside DKIM and <a href="/domain-health/no-dmarc-policy.html">DMARC</a> to form a
+      three-layer email authentication system. SPF verifies the sending server, DKIM verifies the message
+      integrity, and DMARC ties them together with a policy and reporting. Without SPF, the first layer
+      of that system is missing.
+    </p>
+
+    <!-- What an SPF record looks like -->
+    <h2 id="what-it-looks-like">What an SPF record looks like</h2>
+    <p>An SPF record is a TXT entry at your root domain (not a subdomain).</p>
+
+    <!-- Visual: DNS record table -->
+    <div class="diagram" role="figure" aria-label="Example SPF TXT record as it appears in a DNS management console">
+      <div class="diagram-title">SPF TXT record in DNS</div>
+      <div class="diagram-content">
+        <table class="dns-record-table">
+          <thead>
+            <tr><th>Type</th><th>Host</th><th>Value</th><th>TTL</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TXT</td>
+              <td>@</td>
+              <td>v=spf1 include:_spf.google.com include:sendgrid.net ~all</td>
+              <td>3600</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p>Here is an example record with each part explained:</p>
+    <div class="code-block"><span class="comment"># SPF record breakdown</span>
+v=spf1                        <span class="comment"># SPF version (required, must be first)</span>
+include:_spf.google.com       <span class="comment"># Allow Google Workspace servers</span>
+include:sendgrid.net          <span class="comment"># Allow SendGrid servers</span>
+ip4:203.0.113.10              <span class="comment"># Allow a specific IP address (optional)</span>
+~all                          <span class="comment"># Soft fail everything else</span></div>
+
+    <!-- Common includes -->
+    <div class="diagram" role="figure" aria-label="Table of common SPF include values for popular email providers" id="common-includes">
+      <div class="diagram-title">Common SPF includes by provider</div>
+      <div class="diagram-content">
+        <table class="include-table">
+          <thead>
+            <tr><th>Provider</th><th>SPF include value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Google Workspace</td><td>include:_spf.google.com</td></tr>
+            <tr><td>Microsoft 365</td><td>include:spf.protection.outlook.com</td></tr>
+            <tr><td>SendGrid</td><td>include:sendgrid.net</td></tr>
+            <tr><td>Mailchimp</td><td>include:servers.mcsv.net</td></tr>
+            <tr><td>Amazon SES</td><td>include:amazonses.com</td></tr>
+            <tr><td>Postmark</td><td>include:spf.mtasv.net</td></tr>
+            <tr><td>HubSpot</td><td>include:mail.hubspot.net</td></tr>
+            <tr><td>Zoho Mail</td><td>include:zoho.com</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Visual: SPF validation flow -->
+    <div class="diagram" role="figure" aria-label="Flow diagram showing how SPF validation works when an email is received">
+      <div class="diagram-title">How SPF validation works</div>
+      <div class="diagram-content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9993;</div>
+            <div class="flow-text"><strong>Email arrives</strong> at the receiving mail server</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128269;</div>
+            <div class="flow-text"><strong>DNS lookup:</strong> Fetch TXT record at sender's domain</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9745;</div>
+            <div class="flow-text"><strong>Check sender IP:</strong> Is this server listed in the SPF record?</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-green">&#10003;</div>
+            <div class="flow-text"><strong>Match found:</strong> SPF passes, email is trusted</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-amber">&#126;</div>
+            <div class="flow-text"><strong>Soft fail (~all):</strong> Not listed, flagged as suspicious</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#10007;</div>
+            <div class="flow-text"><strong>Hard fail (-all):</strong> Not listed, email rejected</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simple explanation -->
+    <h2 id="simple-explanation">How to think about SPF (simple explanation)</h2>
+    <p>
+      If you are not familiar with DNS or email infrastructure, here is the simplest way to
+      understand SPF:
+    </p>
+    <div class="simple-box">
+      <ul>
+        <li>SPF is a <strong>whitelist of allowed email senders</strong> for your domain, stored in your DNS.</li>
+        <li><span class="simple-check">&#10003;</span> If the sending server is on the list, the email is <strong>trusted</strong>.</li>
+        <li><span class="simple-warn">&#126;</span> If the server is not on the list, the email is <strong>flagged as suspicious</strong> or rejected.</li>
+        <li><span class="simple-cross">&#10007;</span> If there is no list at all (no SPF record), <strong>every server is treated the same</strong>, and email providers have to guess.</li>
+      </ul>
+    </div>
+    <p>
+      That guessing is the problem. Without a whitelist, providers like Google and Microsoft cannot tell
+      the difference between your real emails and a spoofed message from an attacker. The result is that
+      your legitimate emails are more likely to end up in spam, and spoofed emails are more likely to
+      reach inboxes.
+    </p>
+
+    <!-- Without vs with SPF -->
+    <h2 id="without-vs-with">Without vs with SPF</h2>
+    <p>The difference is straightforward. SPF acts as a whitelist for your domain's email senders.</p>
+    <div class="versus-grid">
+      <div class="versus-card versus-card-bad">
+        <h3>Without SPF</h3>
+        <ul>
+          <li>Any server can send email as your domain</li>
+          <li>No way for receivers to verify the sender</li>
+          <li>Higher risk of spoofing and phishing</li>
+          <li>Legitimate emails more likely to land in spam</li>
+        </ul>
+      </div>
+      <div class="versus-card versus-card-good">
+        <h3>With SPF</h3>
+        <ul>
+          <li>Only authorised servers can send email</li>
+          <li>Receivers verify the sender against your DNS</li>
+          <li>Spoofed emails are flagged or rejected</li>
+          <li>Improved deliverability with major providers</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Why this matters -->
+    <h2 id="why-it-matters">Why this matters</h2>
+    <p>
+      Without an SPF record, receiving servers cannot distinguish between legitimate email from your
+      organisation and forged email from an attacker. This creates several problems:
+    </p>
+    <ul>
+      <li><strong>Email spoofing.</strong> Attackers can send phishing emails that appear to come from your domain. Recipients and their email providers have no SPF-based signal to block these.</li>
+      <li><strong>Deliverability problems.</strong> Many email providers penalise or flag messages from domains without SPF. Your legitimate emails may land in spam folders instead of inboxes.</li>
+      <li><strong>Required for DMARC.</strong> SPF is one of the two authentication mechanisms that <a href="/domain-health/no-dmarc-policy.html">DMARC</a> relies on. Without SPF, your DMARC policy cannot fully protect your domain.</li>
+      <li><strong>Compliance requirements.</strong> Google and Yahoo now require SPF for bulk senders (5,000+ emails per day). Missing it can result in rejected messages.</li>
+      <li><strong>Brand damage.</strong> Spoofed emails erode trust in your brand. If recipients receive phishing from your domain, your reputation suffers.</li>
+    </ul>
+    <p>
+      SPF is now a standard requirement for modern email security and is expected by major providers
+      like Google and Microsoft. It is no longer optional for domains that send email.
+    </p>
+
+    <!-- How to tell if this is your issue -->
+    <h2 id="is-this-your-issue">How to tell if this is your issue</h2>
+    <p>
+      Not sure if a missing SPF record is causing your problem? These are common signs that point to
+      SPF-related email authentication issues:
+    </p>
+    <ul>
+      <li><strong>Your emails are going to spam.</strong> If recipients report that your messages land in junk or spam folders, a missing SPF record is one of the most common causes. Email providers use SPF as a basic trust signal when deciding where to place messages.</li>
+      <li><strong>Email authentication is failing.</strong> If you see "authentication failed" or "SPF: NONE" in email headers, your domain has no SPF record for receivers to check against.</li>
+      <li><strong>Google or Microsoft flagged your domain.</strong> Both providers send alerts when they detect authentication gaps. If you received a notification about sender verification, check your SPF record first.</li>
+      <li><strong>Your DMARC setup is not working.</strong> <a href="/domain-health/no-dmarc-policy.html">DMARC</a> depends on SPF (and DKIM) to function. If DMARC reports show SPF failures, the record may be missing or misconfigured.</li>
+      <li><strong>You are setting up email on a new domain.</strong> Adding an SPF record should be one of the first things you do when configuring email for a new domain, alongside <a href="/domain-health/no-dmarc-policy.html">DMARC</a>.</li>
+      <li><strong>A domain health scan flagged this issue.</strong> Tools like 1Pane check for SPF as part of a broader <a href="/domain-health/index.html">domain health assessment</a>. If this was flagged, the record is either missing or invalid.</li>
+    </ul>
+
+    <!-- When this becomes a problem -->
+    <h2 id="when-it-becomes-a-problem">When this becomes a problem</h2>
+    <p>A missing SPF record does not always cause immediate failures, but the risk grows over time. The impact becomes visible when:</p>
+    <ul>
+      <li><strong>Someone spoofs your domain.</strong> Phishing attacks using your domain can happen at any time. Without SPF, there is no server-level check to flag them.</li>
+      <li><strong>You send transactional email.</strong> Order confirmations, password resets, and invoices from your application need SPF to reach inboxes reliably.</li>
+      <li><strong>You scale email volume.</strong> Bulk senders are now required to have SPF by major providers. Without it, your deliverability drops. This is also affected by <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a> that prevent records from being found.</li>
+      <li><strong>You add a new email service.</strong> If you start using a new tool that sends email on your behalf (marketing platform, CRM, helpdesk) and it is not in your SPF record, those emails will fail authentication.</li>
+      <li><strong>A customer reports phishing.</strong> At that point you are already dealing with the consequences rather than preventing the problem.</li>
+    </ul>
+
+    <!-- How to fix it properly -->
+    <h2 id="how-to-fix">How to fix it properly</h2>
+    <p>Follow these steps to add SPF to your domain and prevent email spoofing at the server level.</p>
+
+    <h3>Step 1: Identify all services that send email for your domain</h3>
+    <p>
+      Before writing your SPF record, list every service that sends email using your domain name. Common sources include:
+    </p>
+    <ul>
+      <li>Your email hosting provider (Google Workspace, Microsoft 365, Zoho)</li>
+      <li>Marketing platforms (Mailchimp, HubSpot, ActiveCampaign)</li>
+      <li>Transactional email services (SendGrid, Postmark, Amazon SES)</li>
+      <li>Helpdesk or CRM tools (Zendesk, Freshdesk, Salesforce)</li>
+      <li>Your own application servers (if they send email directly)</li>
+    </ul>
+    <p>Each of these needs to be included in your SPF record. Check the <a href="#common-includes">common includes table</a> above for the correct values.</p>
+
+    <h3>Step 2: Create your SPF record</h3>
+    <p>Combine all your senders into a single TXT record. For example, a domain using Google Workspace and SendGrid:</p>
+    <div class="code-block">v=spf1 include:_spf.google.com include:sendgrid.net ~all</div>
+    <p>
+      The <span class="code-inline">~all</span> at the end means "soft fail" for any server not on the
+      list. This flags unauthorised senders without outright rejecting them, which is safer while you
+      are still verifying your setup.
+    </p>
+
+    <h3>Step 3: Add the record to your DNS</h3>
+    <p>
+      Log in to your DNS provider and add a TXT record at the root domain (<span class="code-inline">@</span>)
+      with your SPF value. If your domain has <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a>,
+      resolve those first, as the SPF record will not be reachable.
+    </p>
+
+    <h3>Step 4: Verify the record</h3>
+    <p>
+      After adding the record, verify it is live. DNS propagation usually takes a few minutes to a few hours.
+      You can check by running:
+    </p>
+    <div class="code-block">dig TXT yourdomain.com</div>
+    <p>Look for a record starting with <span class="code-inline">v=spf1</span> in the output. Or use a 1Pane domain health scan to verify.</p>
+
+    <h3>Step 5: Tighten your policy</h3>
+    <p>
+      Once you have confirmed that all legitimate senders are included and email is flowing correctly,
+      consider changing <span class="code-inline">~all</span> (soft fail) to <span class="code-inline">-all</span>
+      (hard fail) for stricter enforcement:
+    </p>
+    <div class="code-block">v=spf1 include:_spf.google.com include:sendgrid.net -all</div>
+
+    <h3>Step 6: Set up DMARC</h3>
+    <p>
+      SPF on its own verifies the sending server, but it does not tell email providers what to do when
+      checks fail. Add a <a href="/domain-health/no-dmarc-policy.html">DMARC record</a> to define a
+      policy and start receiving reports about your email authentication.
+    </p>
+
+    <div class="callout">
+      <p>
+        <strong>Important:</strong> SPF has a limit of 10 DNS lookups. Each
+        <span class="code-inline">include:</span> counts as one lookup, and nested includes within those
+        count too. If you exceed this limit, SPF checks will fail entirely. Consolidate where possible
+        and avoid unnecessary includes.
+      </p>
+    </div>
+
+    <!-- Common mistakes -->
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+      <li>
+        <strong>Multiple SPF records.</strong> Your domain must have exactly one SPF TXT record. If you
+        need multiple includes, combine them into a single record. Having two SPF records causes both to
+        be ignored.
+      </li>
+      <li>
+        <strong>Using <span class="code-inline">+all</span>.</strong> Setting
+        <span class="code-inline">+all</span> allows any server to send email as your domain. This
+        defeats the purpose of SPF entirely. Use <span class="code-inline">~all</span> or
+        <span class="code-inline">-all</span> instead.
+      </li>
+      <li>
+        <strong>Missing senders.</strong> If you add SPF but forget to include a service that sends email
+        for you (such as a CRM, helpdesk, or marketing tool), those emails will start failing delivery.
+        Audit all your sending services before publishing.
+      </li>
+      <li>
+        <strong>Exceeding the 10-lookup limit.</strong> Each <span class="code-inline">include:</span>
+        and <span class="code-inline">redirect=</span> adds to the lookup count. Nested includes within
+        those also count. If you hit the limit, SPF validation fails entirely. Use
+        <span class="code-inline">ip4:</span> or <span class="code-inline">ip6:</span> for known static
+        IPs to reduce lookups.
+      </li>
+      <li>
+        <strong>Adding SPF to a subdomain.</strong> SPF records must be at the root domain, not at a
+        subdomain (unless you send email from that subdomain specifically). A record at
+        <span class="code-inline">mail.yourdomain.com</span> does not protect
+        <span class="code-inline">yourdomain.com</span>.
+      </li>
+      <li>
+        <strong>DNS propagation delay.</strong> After adding the record, allow up to 48 hours for full
+        propagation. Most changes take effect within a few hours. If the record is not appearing, check
+        for <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a>.
+      </li>
+    </ul>
+
+    <!-- How 1Pane detects this -->
+    <h2 id="how-1pane-detects">How 1Pane detects this</h2>
+    <p>
+      During a domain health scan, 1Pane queries the TXT records at your root domain and looks for a
+      record starting with <span class="code-inline">v=spf1</span>. If none is found, the scan flags
+      SPF as missing. 1Pane also checks for common misconfigurations like <span class="code-inline">+all</span>
+      policies, the 10-lookup limit, and duplicate records.
+    </p>
+    <p>
+      1Pane checks SPF alongside related issues including
+      <a href="/domain-health/no-dmarc-policy.html">missing DMARC records</a> and
+      <a href="/domain-health/dns-lookup-failed.html">DNS resolution failures</a>. Changes between scans
+      are tracked, so you can verify that your fix has taken effect.
+    </p>
+
+    <!-- FAQ -->
+    <h2 id="faq">Frequently asked questions</h2>
+
+    <h3>Do I need SPF if I already have DMARC?</h3>
+    <p>
+      Yes. <a href="/domain-health/no-dmarc-policy.html">DMARC</a> does not replace SPF. DMARC defines what
+      happens when authentication fails, but it relies on SPF (and DKIM) to perform the actual checks.
+      Without SPF, DMARC has nothing to enforce on the server verification side. You need both.
+    </p>
+
+    <h3>Can I have more than one SPF record?</h3>
+    <p>
+      No. Your domain must have exactly one SPF TXT record. If you need to authorise multiple email
+      services, combine them into a single record using multiple
+      <span class="code-inline">include:</span> entries. Having two separate SPF records causes email
+      providers to treat both as invalid.
+    </p>
+
+    <h3>How long does SPF take to work?</h3>
+    <p>
+      Most DNS changes propagate within a few minutes to a few hours. In rare cases, full global
+      propagation can take up to 48 hours. Once the record is live, email providers will start
+      checking it immediately. If the record is not appearing after several hours, check for
+      <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a>.
+    </p>
+
+    <h3>Will adding SPF stop all spam from my domain?</h3>
+    <p>
+      SPF stops unauthorised servers from passing sender verification, but it does not block all
+      types of spoofing on its own. For full protection, combine SPF with DKIM and
+      <a href="/domain-health/no-dmarc-policy.html">DMARC</a>. Together, these three protocols
+      cover server verification, message integrity, and policy enforcement.
+    </p>
+
+    <!-- Related issues -->
+    <h2 id="related-issues">Related issues</h2>
+    <p>These domain health issues are closely related to SPF and email authentication:</p>
+    <div class="related-grid">
+      <a href="/domain-health/no-dmarc-policy.html" class="related-card">
+        <div class="rc-title">No DMARC policy</div>
+        <div class="rc-desc">DMARC depends on SPF to work. Without a DMARC record, there is no policy enforcement even if SPF passes.</div>
+      </a>
+      <a href="/domain-health/dns-lookup-failed.html" class="related-card">
+        <div class="rc-title">DNS lookup failed</div>
+        <div class="rc-desc">If DNS resolution fails, email providers cannot find your SPF, DMARC, or MX records.</div>
+      </a>
+      <a href="/domain-health/no-a-record.html" class="related-card">
+        <div class="rc-title">No A record</div>
+        <div class="rc-desc">A missing A record means your domain does not resolve to an IP address, affecting reachability.</div>
+      </a>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <p>Scan your domain now to check SPF, DMARC, DNS and SSL in one place.</p>
+      <a href="/dashboard" class="cta-button">Scan your domain with 1Pane</a>
+    </div>
+
+    </article>
+
+    <div class="footer">
+      <a href="/domain-health/index.html">Domain Health Guides</a> &middot; <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>

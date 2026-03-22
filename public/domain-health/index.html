@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Health Issues | 1Pane</title>
+  <meta name="description" content="Understand and fix common DNS, email authentication, and SSL issues affecting your domain health.">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .logo-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #1a1a2e; margin-bottom: 48px; }
+    .logo-link img { height: 28px; }
+    h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .intro { font-size: 17px; color: #555; margin-bottom: 40px; max-width: 560px; }
+    .category { margin-bottom: 36px; }
+    .category-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: #888; margin-bottom: 12px; }
+    .card-list { display: flex; flex-direction: column; gap: 8px; }
+    .card-link {
+      display: block;
+      padding: 16px 20px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .card-link:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .card-link .title { font-size: 16px; font-weight: 600; }
+    .card-link .desc { font-size: 14px; color: #666; margin-top: 4px; }
+    .card-link .arrow { float: right; color: #999; font-size: 18px; margin-top: 2px; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="logo-link">
+      <img src="/brand/1pane-logo.svg" alt="1Pane">
+    </a>
+
+    <h1>Domain Health Issues</h1>
+    <p class="intro">
+      This section covers common DNS, email authentication, and SSL problems that affect your domain.
+      Each guide explains what went wrong, why it matters, and how to fix it.
+    </p>
+
+    <div class="category">
+      <div class="category-title">Email Authentication</div>
+      <div class="card-list">
+        <a href="/domain-health/no-dmarc-policy.html" class="card-link">
+          <span class="arrow">&rsaquo;</span>
+          <div class="title">No DMARC policy</div>
+          <div class="desc">Your domain has no DMARC record, leaving it open to email spoofing.</div>
+        </a>
+        <a href="/domain-health/spf-record-missing.html" class="card-link">
+          <span class="arrow">&rsaquo;</span>
+          <div class="title">SPF record missing</div>
+          <div class="desc">Without an SPF record, anyone can send email pretending to be your domain.</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title">DNS</div>
+      <div class="card-list">
+        <a href="/domain-health/dns-lookup-failed.html" class="card-link">
+          <span class="arrow">&rsaquo;</span>
+          <div class="title">DNS lookup failed</div>
+          <div class="desc">The DNS resolver could not retrieve records for your domain.</div>
+        </a>
+        <a href="/domain-health/no-a-record.html" class="card-link">
+          <span class="arrow">&rsaquo;</span>
+          <div class="title">No A record</div>
+          <div class="desc">Your domain does not resolve to an IPv4 address, so it may not be reachable.</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title">SSL</div>
+      <div class="card-list">
+        <a href="/domain-health/ssl-certificate-expired.html" class="card-link">
+          <span class="arrow">&rsaquo;</span>
+          <div class="title">SSL certificate expired</div>
+          <div class="desc">An expired certificate causes browser warnings and breaks trust with visitors.</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>

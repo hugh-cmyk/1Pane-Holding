@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSL Certificate Expired: What It Means and How to Fix It | 1Pane</title>
+  <meta name="description" content="Your SSL certificate has expired and browsers are showing 'Your connection is not private'. Learn what this means, how to renew your certificate, and how to prevent it from happening again.">
+  <link rel="canonical" href="https://1pane.com/domain-health/ssl-certificate-expired.html">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SSL Certificate Expired: What It Means and How to Fix It">
+  <meta property="og:description" content="Your SSL certificate has expired and visitors see security warnings. Learn how to renew it and get your site back online.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://1pane.com/domain-health/ssl-certificate-expired.html">
+
+  <!-- Structured data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://1pane.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Domain Health", "item": "https://1pane.com/domain-health/" },
+      { "@type": "ListItem", "position": 3, "name": "SSL Certificate Expired" }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does an expired SSL certificate mean my site was hacked?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. An expired certificate does not mean your site has been compromised. It simply means the certificate's validity period has passed and it needs to be renewed. Browsers block access as a precaution, but the issue is administrative, not a security breach."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often do SSL certificates expire?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Let's Encrypt certificates expire every 90 days. Commercial certificates from providers like DigiCert or Sectigo typically last 1 year. Cloudflare Universal SSL certificates renew automatically and last 1 year. Most providers support automatic renewal to prevent expiry."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why didn't my SSL certificate auto-renew?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Common reasons include: the renewal cron job or systemd timer stopped running, DNS records changed and the certificate authority could not validate domain ownership, the server was unreachable during the renewal attempt, or the renewal tool (like Certbot) was not configured correctly. Check your server logs for renewal errors."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can visitors bypass the 'Your connection is not private' warning?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In most browsers, visitors can click 'Advanced' and then 'Proceed to site (unsafe)' to bypass the warning. However, most visitors will not do this. The warning is designed to look alarming, and studies show that over 90% of visitors leave immediately when they see it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does 'Your connection is not private' mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This browser warning appears when the SSL certificate for a website is expired, invalid, or missing. It means the browser cannot establish a secure encrypted connection. The most common cause is an expired certificate that needs to be renewed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I check when my SSL certificate expires?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Click the padlock icon in your browser's address bar and view the certificate details. From the command line, run: echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -dates. You can also use 1Pane to monitor certificate expiry dates automatically."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to fix an expired SSL certificate",
+    "description": "Step-by-step guide to renewing an expired SSL certificate and restoring HTTPS on your website.",
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-22",
+    "totalTime": "PT5M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Confirm the certificate is expired",
+        "text": "Visit your site in a browser. If you see 'Your connection is not private' or a padlock warning, the certificate is expired or invalid. Check the expiry date with openssl or your browser's certificate viewer."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Identify your certificate provider",
+        "text": "Determine who issued your certificate: Let's Encrypt, Cloudflare, your hosting provider, or a commercial CA like DigiCert or Sectigo."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Renew the certificate",
+        "text": "For Let's Encrypt, run 'certbot renew'. For Cloudflare, check the SSL/TLS dashboard. For hosting providers, use their control panel. For commercial CAs, log in to the provider portal and reissue."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Install the new certificate",
+        "text": "If renewal is not automatic, upload the new certificate files to your server or hosting panel. Include the intermediate (chain) certificate."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Restart your web server",
+        "text": "Restart Nginx, Apache, or your web server to load the new certificate. For managed hosting, this step is usually automatic."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Verify in the browser",
+        "text": "Visit your site and confirm the padlock icon appears. Click it to verify the new expiry date. Test in an incognito window to avoid cached certificate data."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #999; margin-bottom: 24px; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a2e; text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .updated-date { font-size: 13px; color: #999; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 20px; line-height: 1.3; }
+    .lead { font-size: 17px; color: #555; margin-bottom: 12px; }
+    .fix-summary {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e40af;
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+    }
+    h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 16px; color: #333; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #333; }
+    li { margin-bottom: 8px; }
+    a { color: #1e40af; }
+    a:hover { text-decoration: none; }
+    .code-block {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-inline {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+    .callout {
+      background: #f0f7ff;
+      border-left: 3px solid #3b82f6;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    .callout p { margin-bottom: 0; color: #1e40af; }
+    .callout-warn {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+    }
+    .callout-warn p { color: #92400e; }
+
+    /* Quick fix box */
+    .quick-fix {
+      background: #fff;
+      border: 2px solid #183D9C;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0 40px;
+    }
+    .quick-fix-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .quick-fix-badge {
+      background: #183D9C;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quick-fix-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    /* Visual diagrams */
+    .diagram {
+      margin: 28px 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .diagram-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      padding: 14px 20px 0;
+    }
+    .diagram-content {
+      padding: 20px;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+    }
+    .flow-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-icon-blue { background: #eff6ff; color: #1e40af; }
+    .flow-icon-green { background: #f0fdf4; color: #16a34a; }
+    .flow-icon-red { background: #fef2f2; color: #dc2626; }
+    .flow-text { font-size: 14px; color: #333; }
+    .flow-text strong { color: #1a1a2e; }
+    .flow-arrow { color: #ccc; font-size: 18px; text-align: center; width: 100%; }
+    .flow-fail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+    .flow-ok-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #16a34a;
+      background: #f0fdf4;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .simple-box ul { margin-bottom: 0; }
+    .simple-box li { font-size: 15px; }
+
+    /* Comparison cards (without vs with) */
+    .versus-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    @media (min-width: 540px) {
+      .versus-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .versus-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+    }
+    .versus-card-bad { background: #fef2f2; border-color: #fecaca; }
+    .versus-card-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .versus-card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; }
+    .versus-card ul { margin-bottom: 0; padding-left: 20px; }
+    .versus-card li { font-size: 14px; margin-bottom: 6px; }
+    .versus-card-bad h3 { color: #991b1b; }
+    .versus-card-bad li { color: #7f1d1d; }
+    .versus-card-good h3 { color: #166534; }
+    .versus-card-good li { color: #14532d; }
+
+    /* Provider table */
+    .provider-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .provider-table th, .provider-table td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .provider-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #666;
+    }
+    .provider-table td { color: #333; }
+    .provider-table tr:last-child td { border-bottom: none; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 32px 0 40px;
+    }
+    .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: #1e40af; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Related issues */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (min-width: 540px) {
+      .related-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .related-card {
+      display: block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .related-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .related-card .rc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .related-card .rc-desc { font-size: 13px; color: #666; }
+
+    .cta-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .cta-box p { color: #555; margin-bottom: 16px; }
+    .cta-button {
+      display: inline-block;
+      background: #183D9C;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .cta-button:hover { background: #153580; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 16px 60px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 19px; margin-top: 36px; }
+      .quick-fix { padding: 16px; }
+      .flow-step { gap: 8px; }
+      .versus-card { padding: 16px; }
+      .provider-table th, .provider-table td { padding: 8px 10px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/domain-health/index.html">Domain Health</a>
+      <span class="sep">/</span>
+      <span>SSL Certificate Expired</span>
+    </nav>
+
+    <article>
+    <p class="updated-date">Last updated: <time datetime="2026-03-22">22 March 2026</time></p>
+
+    <h1>SSL certificate expired: what it means and how to fix it</h1>
+
+    <!-- Featured snippet target -->
+    <p class="lead">
+      Your SSL certificate has expired and browsers are showing "Your connection is not private" or
+      "This site is not secure" to every visitor. Most people will leave immediately. Your website is
+      effectively blocked: HTTPS connections fail, payment flows break, and APIs that connect to your
+      domain over HTTPS will start returning errors. This is not a hack or a breach. It means the
+      certificate needs to be renewed.
+    </p>
+
+    <div class="fix-summary">
+      <strong>Fix:</strong> Identify your certificate provider (Let's Encrypt, Cloudflare, or your host),
+      renew the certificate, restart your web server if needed, and verify the padlock icon returns in
+      the browser.
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#quick-fix">Quick fix (5 minutes)</a></li>
+        <li><a href="#what-is-ssl">What is an SSL certificate</a></li>
+        <li><a href="#how-https-works">How HTTPS works</a></li>
+        <li><a href="#simple-explanation">How to think about SSL (simple)</a></li>
+        <li><a href="#is-this-your-issue">How to tell if this is your issue</a></li>
+        <li><a href="#expired-vs-valid">Expired certificate vs valid certificate</a></li>
+        <li><a href="#why-it-matters">Why this matters</a></li>
+        <li><a href="#how-to-fix">How to fix it properly</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+        <li><a href="#how-1pane-detects">How 1Pane detects this</a></li>
+        <li><a href="#faq">Frequently asked questions</a></li>
+        <li><a href="#related-issues">Related issues</a></li>
+      </ul>
+    </nav>
+
+    <!-- Quick fix -->
+    <div class="quick-fix" id="quick-fix">
+      <div class="quick-fix-header">
+        <span class="quick-fix-badge">Quick fix</span>
+        <span class="quick-fix-title">Renew your certificate in 5 minutes</span>
+      </div>
+      <ol>
+        <li><strong>Check the expiry date:</strong></li>
+      </ol>
+      <div class="code-block">echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -dates</div>
+      <ol start="2">
+        <li><strong>Identify your certificate provider.</strong> Check the issuer in the output above, or look in your hosting/DNS dashboard. Common providers:</li>
+      </ol>
+      <table class="provider-table">
+        <tr><th>Provider</th><th>How to renew</th></tr>
+        <tr><td>Let's Encrypt</td><td>Run <span class="code-inline">sudo certbot renew</span></td></tr>
+        <tr><td>Cloudflare</td><td>Renews automatically. Check SSL/TLS in dashboard.</td></tr>
+        <tr><td>Hosting provider</td><td>Use the SSL section in your control panel.</td></tr>
+        <tr><td>Commercial CA</td><td>Log in to the provider portal and reissue.</td></tr>
+      </table>
+      <ol start="3">
+        <li><strong>Restart your web server</strong> (if you manage it yourself):</li>
+      </ol>
+      <div class="code-block"><span class="comment"># Nginx</span>
+sudo systemctl restart nginx
+
+<span class="comment"># Apache</span>
+sudo systemctl restart apache2</div>
+      <ol start="4">
+        <li><strong>Verify in the browser.</strong> Visit your site in an incognito window. The padlock icon should appear and the "not private" warning should be gone.</li>
+      </ol>
+      <p style="margin-bottom:0; color: #555; font-size: 14px;">
+        If the warning persists after renewal, clear your browser cache or test in a different browser.
+        The issue is almost always a cached version of the old certificate.
+      </p>
+    </div>
+
+    <!-- What is an SSL certificate -->
+    <h2 id="what-is-ssl">What is an SSL certificate</h2>
+    <p>
+      An SSL certificate is a digital file that proves your website's identity and enables encrypted
+      connections. When a visitor connects to your site over HTTPS, the certificate tells the browser
+      two things: that the site is genuinely owned by you, and that the connection is encrypted so
+      data cannot be intercepted in transit.
+    </p>
+    <p>
+      Every SSL certificate has a validity period. Let's Encrypt certificates are valid for 90 days.
+      Commercial certificates from providers like DigiCert or Sectigo typically last 1 year. When the
+      validity period ends, the certificate expires and browsers stop trusting it. The encryption still
+      works technically, but the browser has no way to verify the certificate is current, so it blocks
+      the connection as a safety precaution.
+    </p>
+    <p>
+      SSL and TLS are often used interchangeably. TLS (Transport Layer Security) is the modern successor
+      to SSL, but "SSL certificate" remains the common term.
+    </p>
+
+    <!-- How HTTPS works -->
+    <h2 id="how-https-works">How HTTPS works</h2>
+    <p>
+      Every time a visitor loads your site over HTTPS, a handshake occurs between the browser and your
+      server. The certificate is checked during this handshake. If it is expired, the connection is
+      blocked before the page even begins to load.
+    </p>
+
+    <div class="diagram" role="figure" aria-label="Flow diagram showing how HTTPS establishes a connection and where an expired certificate causes failure">
+      <div class="diagram-title">HTTPS connection flow</div>
+      <div class="diagram-content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#127760;</div>
+            <div class="flow-text"><strong>Browser</strong> requests https://yourdomain.com</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128269;</div>
+            <div class="flow-text"><strong>DNS resolves</strong> the domain to your server's <a href="/domain-health/no-a-record.html">A record</a> IP address</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128274;</div>
+            <div class="flow-text"><strong>SSL/TLS handshake</strong> begins. Server presents the certificate.</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#10007;</div>
+            <div class="flow-text"><strong>Certificate is expired.</strong> Browser rejects the handshake. <span class="flow-fail-label">Fails here</span></div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#9888;</div>
+            <div class="flow-text"><strong>"Your connection is not private"</strong> warning is shown. Page does not load.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      With a valid certificate, the handshake succeeds, the connection is encrypted, and the browser
+      shows the padlock icon. The page loads normally. An expired certificate breaks this flow at the
+      validation step, before any page content is transferred.
+    </p>
+
+    <!-- Simple explanation -->
+    <h2 id="simple-explanation">How to think about SSL (simple)</h2>
+    <p>If you are not familiar with SSL certificates, here is the simplest way to understand this:</p>
+    <div class="simple-box">
+      <ul>
+        <li>An SSL certificate is like an <strong>ID card for your website</strong>. It proves your site is who it says it is.</li>
+        <li>Like a real ID, it has an <strong>expiry date</strong>. Once that date passes, it is no longer accepted.</li>
+        <li>When a browser sees an expired certificate, it <strong>blocks the connection</strong>. Visitors see a warning page instead of your site.</li>
+        <li>This is <strong>not a hack</strong>. Nothing is broken or compromised. The certificate just needs to be renewed, like renewing a passport.</li>
+      </ul>
+    </div>
+    <p>
+      The good news is that renewing a certificate is usually straightforward. Many hosting providers
+      and tools like Let's Encrypt handle it automatically. If auto-renewal has failed, the fix is
+      typically a single command or a few clicks in a dashboard.
+    </p>
+
+    <!-- How to tell if this is your issue -->
+    <h2 id="is-this-your-issue">How to tell if this is your issue</h2>
+    <p>These are common signs that an expired SSL certificate is the cause of your problem:</p>
+    <ul>
+      <li><strong>Browser shows "Your connection is not private".</strong> This is the most common sign. Chrome, Firefox, and Safari all display full-page warnings with slightly different wording. Chrome uses <span class="code-inline">NET::ERR_CERT_DATE_INVALID</span>.</li>
+      <li><strong>HTTPS fails but HTTP may still work.</strong> If your site loads on <span class="code-inline">http://</span> but not <span class="code-inline">https://</span>, the issue is almost certainly the SSL certificate, not your server or <a href="/domain-health/dns-lookup-failed.html">DNS</a>.</li>
+      <li><strong>APIs return SSL errors.</strong> Applications and integrations that connect to your domain over HTTPS will report errors like <span class="code-inline">SSL_ERROR_EXPIRED_CERT_ALERT</span> or <span class="code-inline">certificate has expired</span>.</li>
+      <li><strong>Certificate expiry warning in monitoring tools.</strong> Tools like 1Pane or your hosting dashboard may flag that the certificate has expired or is about to expire.</li>
+      <li><strong>The padlock icon is missing or shows a warning.</strong> In the browser address bar, the padlock is replaced by a "Not secure" label or a warning triangle.</li>
+    </ul>
+    <div class="callout">
+      <p>
+        <strong>Quick check:</strong> Run
+        <span class="code-inline">echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -dates</span>
+        to see the exact expiry date. If <span class="code-inline">notAfter</span> is in the past, the
+        certificate is expired.
+      </p>
+    </div>
+
+    <!-- Expired vs valid -->
+    <h2 id="expired-vs-valid">Expired certificate vs valid certificate</h2>
+    <div class="versus-grid">
+      <div class="versus-card versus-card-bad">
+        <h3>Expired certificate</h3>
+        <ul>
+          <li>"Your connection is not private" warning</li>
+          <li>Visitors blocked from accessing your site</li>
+          <li>HTTPS connections rejected</li>
+          <li>APIs and webhooks fail over HTTPS</li>
+          <li>No padlock icon in the browser</li>
+          <li>Payment and checkout flows broken</li>
+        </ul>
+      </div>
+      <div class="versus-card versus-card-good">
+        <h3>Valid certificate</h3>
+        <ul>
+          <li>Padlock icon shown in the address bar</li>
+          <li>Visitors connect without warnings</li>
+          <li>All data encrypted in transit</li>
+          <li>APIs and integrations work normally</li>
+          <li>Search engines rank HTTPS pages higher</li>
+          <li>Payment processing works as expected</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Why it matters -->
+    <h2 id="why-it-matters">Why this matters</h2>
+    <p>
+      An expired SSL certificate does more than show a warning. It has immediate, measurable impact on
+      your business:
+    </p>
+    <ul>
+      <li><strong>Visitors are blocked.</strong> Browsers display a full-page "Your connection is not private" warning. Studies show over 90% of visitors leave immediately. They do not click "Advanced" to bypass it.</li>
+      <li><strong>Trust is damaged.</strong> Even if visitors know how to proceed past the warning, seeing a security error makes your site look neglected or compromised. Rebuilding that trust takes time.</li>
+      <li><strong>API and integration failures.</strong> Any service that connects to your domain over HTTPS (webhooks, payment processors, CRM integrations, monitoring tools) will reject the expired certificate. Automated processes will break silently.</li>
+      <li><strong>SEO impact.</strong> Google has used HTTPS as a ranking signal since 2014. An expired certificate can cause your pages to drop in search results. If the site is unreachable for an extended period, pages may be deindexed entirely.</li>
+      <li><strong>Payment processing stops.</strong> Payment gateways require a valid SSL certificate. If your site handles transactions, checkout will fail completely. PCI compliance also requires valid certificates.</li>
+      <li><strong>Email reputation can be affected.</strong> If your mail server uses the same certificate, <a href="/domain-health/spf-record-missing.html">email authentication</a> and encrypted email delivery (STARTTLS) may also fail.</li>
+    </ul>
+
+    <!-- How to fix it properly -->
+    <h2 id="how-to-fix">How to fix it properly</h2>
+    <p>Work through these steps in order. The right approach depends on how your certificate is managed.</p>
+
+    <h3>Step 1: Confirm the certificate is expired</h3>
+    <p>
+      Before making changes, verify that the certificate is actually expired and not a different issue
+      (like a <a href="/domain-health/dns-lookup-failed.html">DNS failure</a> or
+      <a href="/domain-health/no-a-record.html">missing A record</a>):
+    </p>
+    <div class="code-block"><span class="comment"># Check the certificate dates</span>
+echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -dates
+
+<span class="comment"># Check the issuer</span>
+echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -issuer</div>
+    <p>
+      The <span class="code-inline">notAfter</span> date tells you when the certificate expired. The
+      issuer tells you who provided it, which determines how to renew.
+    </p>
+
+    <h3>Step 2: Identify your certificate provider</h3>
+    <p>
+      The renewal process depends entirely on who issued your certificate. Here are the most common setups:
+    </p>
+    <table class="provider-table">
+      <tr><th>Provider</th><th>Certificate type</th><th>Validity</th></tr>
+      <tr><td>Let's Encrypt</td><td>Free, auto-renewing (via Certbot)</td><td>90 days</td></tr>
+      <tr><td>Cloudflare</td><td>Universal SSL (automatic)</td><td>1 year</td></tr>
+      <tr><td>Hosting provider</td><td>Varies (often Let's Encrypt)</td><td>90 days to 1 year</td></tr>
+      <tr><td>DigiCert / Sectigo</td><td>Commercial (paid)</td><td>1 year</td></tr>
+    </table>
+
+    <h3>Step 3: Renew the certificate</h3>
+
+    <p><strong>Let's Encrypt (Certbot):</strong></p>
+    <div class="code-block"><span class="comment"># Renew all certificates</span>
+sudo certbot renew
+
+<span class="comment"># Force renewal of a specific domain</span>
+sudo certbot certonly --force-renewal -d yourdomain.com</div>
+    <p>
+      If Certbot reports errors, check that your <a href="/domain-health/no-a-record.html">A record</a>
+      points to the correct server and that port 80 is accessible (Let's Encrypt uses HTTP validation by default).
+    </p>
+
+    <p><strong>Cloudflare:</strong></p>
+    <p>
+      Cloudflare Universal SSL certificates renew automatically. If yours has expired, log in to the
+      Cloudflare dashboard, navigate to SSL/TLS, and check for errors. You may need to re-enable Universal
+      SSL or verify your domain. If you use a Cloudflare Origin Certificate for the connection between
+      Cloudflare and your server, check that separately.
+    </p>
+
+    <p><strong>Hosting provider:</strong></p>
+    <p>
+      Most hosting providers (cPanel, Plesk, Vercel, Netlify) offer one-click SSL renewal or handle it
+      automatically. Log in to your hosting control panel and look for an SSL or Security section. If
+      auto-renewal failed, there is usually a "Reissue" or "Renew" button.
+    </p>
+
+    <p><strong>Commercial CA (DigiCert, Sectigo, etc.):</strong></p>
+    <p>
+      Log in to the certificate provider's portal, reissue the certificate, and download the new files.
+      You will need to install them on your server manually.
+    </p>
+
+    <h3>Step 4: Install the new certificate</h3>
+    <p>
+      If renewal is not automatic (commercial CAs, manual Certbot setups), you need to install the new
+      certificate files on your server. Make sure to include the intermediate (chain) certificate. An
+      incomplete chain will cause errors in some browsers even if the main certificate is valid.
+    </p>
+
+    <h3>Step 5: Restart your web server</h3>
+    <p>
+      Your web server needs to reload the new certificate files. This step is automatic on managed
+      hosting platforms, but required on servers you manage yourself:
+    </p>
+    <div class="code-block"><span class="comment"># Nginx</span>
+sudo systemctl restart nginx
+
+<span class="comment"># Apache</span>
+sudo systemctl restart apache2
+
+<span class="comment"># Test Nginx config before restarting</span>
+sudo nginx -t</div>
+
+    <div class="callout-warn callout">
+      <p>
+        <strong>Important:</strong> Always test your Nginx or Apache config before restarting. A syntax error
+        in the config will cause the restart to fail, taking your site offline completely.
+      </p>
+    </div>
+
+    <h3>Step 6: Verify in the browser</h3>
+    <p>
+      Open your site in an incognito/private browsing window (to avoid cached certificate data):
+    </p>
+    <ul>
+      <li>The padlock icon should appear in the address bar</li>
+      <li>Click the padlock to view certificate details and confirm the new expiry date</li>
+      <li>The "Your connection is not private" warning should be gone</li>
+    </ul>
+    <p>
+      You can also verify from the command line:
+    </p>
+    <div class="code-block"><span class="comment"># Verify the new certificate</span>
+echo | openssl s_client -connect yourdomain.com:443 2>/dev/null | openssl x509 -noout -dates
+
+<span class="comment"># Check the full certificate chain</span>
+echo | openssl s_client -connect yourdomain.com:443 2>/dev/null -showcerts</div>
+
+    <!-- Common mistakes -->
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+      <li>
+        <strong>Auto-renewal failed silently.</strong> Let's Encrypt certificates expire every 90 days.
+        If the Certbot cron job or systemd timer stopped running, the certificate will expire without
+        warning. Check <span class="code-inline">systemctl status certbot.timer</span> and review
+        <span class="code-inline">/var/log/letsencrypt/letsencrypt.log</span> for errors.
+      </li>
+      <li>
+        <strong>Old certificate still being served.</strong> After renewal, make sure the web server is
+        actually serving the new certificate. If you did not restart the server, it will continue serving
+        the expired one from memory.
+      </li>
+      <li>
+        <strong>Incomplete certificate chain.</strong> Some browsers will show warnings if the intermediate
+        certificate is missing, even if the main certificate is valid. Always include the full chain file
+        when installing a certificate.
+      </li>
+      <li>
+        <strong>DNS or A record changed.</strong> If you recently changed your
+        <a href="/domain-health/no-a-record.html">A record</a> or
+        <a href="/domain-health/dns-lookup-failed.html">DNS provider</a>, the old certificate may not be
+        valid for the new setup. Let's Encrypt HTTP validation requires the domain's A record to point
+        to the server running Certbot.
+      </li>
+      <li>
+        <strong>Port 80 blocked.</strong> Let's Encrypt uses HTTP (port 80) to validate domain ownership
+        by default. If a firewall or security group blocks port 80, renewal will fail. Use DNS validation
+        as an alternative.
+      </li>
+      <li>
+        <strong>Assuming all subdomains are covered.</strong> A certificate for <span class="code-inline">yourdomain.com</span>
+        does not automatically cover <span class="code-inline">www.yourdomain.com</span> or
+        <span class="code-inline">api.yourdomain.com</span>. Make sure the certificate covers all the
+        hostnames you use, or use a wildcard certificate (<span class="code-inline">*.yourdomain.com</span>).
+      </li>
+    </ul>
+
+    <!-- How 1Pane detects this -->
+    <h2 id="how-1pane-detects">How 1Pane detects this</h2>
+    <p>
+      During a domain health scan, 1Pane connects to your domain over HTTPS and inspects the SSL
+      certificate. It checks the expiry date, the certificate chain, and the issuer. Expired certificates
+      are flagged as critical issues. Certificates expiring within 30 days are flagged as warnings, giving
+      you time to renew before visitors are affected.
+    </p>
+    <p>
+      1Pane also checks for related issues that can compound an SSL problem, including
+      <a href="/domain-health/dns-lookup-failed.html">DNS lookup failures</a> (which prevent certificate
+      renewal via HTTP validation), missing <a href="/domain-health/no-a-record.html">A records</a>
+      (which prevent traffic from reaching your server), and missing
+      <a href="/domain-health/spf-record-missing.html">SPF</a> or
+      <a href="/domain-health/no-dmarc-policy.html">DMARC</a> records (which affect email security).
+    </p>
+
+    <!-- FAQ -->
+    <h2 id="faq">Frequently asked questions</h2>
+
+    <h3>Does an expired SSL certificate mean my site was hacked?</h3>
+    <p>
+      No. An expired certificate is not a security breach. It means the certificate's validity period
+      has passed and it needs to be renewed. Browsers block access as a precaution, but your site,
+      data, and server are not compromised. Think of it like an expired driving licence: you are still
+      the same person, but the document needs to be renewed.
+    </p>
+
+    <h3>How often do SSL certificates expire?</h3>
+    <p>
+      It depends on the provider. Let's Encrypt certificates expire every 90 days (but auto-renew
+      if configured correctly). Commercial certificates from providers like DigiCert or Sectigo last
+      1 year. Cloudflare Universal SSL certificates also last 1 year and renew automatically. The
+      industry is moving towards shorter validity periods to improve security.
+    </p>
+
+    <h3>Why did my certificate not auto-renew?</h3>
+    <p>
+      The most common reasons are: the Certbot timer or cron job stopped running, the server was
+      unreachable during the renewal window, port 80 was blocked by a firewall (preventing HTTP
+      validation), or your <a href="/domain-health/no-a-record.html">A record</a> changed and no
+      longer points to the server running the renewal tool. Check
+      <span class="code-inline">/var/log/letsencrypt/letsencrypt.log</span> for specific error messages.
+    </p>
+
+    <h3>Can visitors bypass the "Your connection is not private" warning?</h3>
+    <p>
+      In most browsers, visitors can click "Advanced" and then "Proceed to site (unsafe)" to bypass
+      the warning. However, the vast majority of visitors will not do this. The warning is deliberately
+      designed to look alarming. You should never rely on visitors bypassing it. Renew the certificate
+      as quickly as possible.
+    </p>
+
+    <!-- Related issues -->
+    <h2 id="related-issues">Related issues</h2>
+    <p>SSL certificate problems are often connected to other domain health issues:</p>
+    <div class="related-grid">
+      <a href="/domain-health/dns-lookup-failed.html" class="related-card">
+        <div class="rc-title">DNS lookup failed</div>
+        <div class="rc-desc">DNS failures prevent certificate renewal via HTTP validation and make your entire domain unreachable.</div>
+      </a>
+      <a href="/domain-health/no-a-record.html" class="related-card">
+        <div class="rc-title">No A record</div>
+        <div class="rc-desc">Without an A record, traffic cannot reach your server and certificate validation will fail.</div>
+      </a>
+      <a href="/domain-health/no-dmarc-policy.html" class="related-card">
+        <div class="rc-title">No DMARC policy</div>
+        <div class="rc-desc">If your mail server shares the same certificate, expired SSL can also affect email encryption.</div>
+      </a>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <p>Scan your domain with 1Pane to check SSL, DNS, and email authentication issues in one place.</p>
+      <a href="/dashboard" class="cta-button">Scan your domain with 1Pane</a>
+    </div>
+
+    </article>
+
+    <div class="footer">
+      <a href="/domain-health/index.html">Domain Health Guides</a> &middot; <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>

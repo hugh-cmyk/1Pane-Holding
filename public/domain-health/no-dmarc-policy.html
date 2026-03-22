@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No DMARC Policy: What It Means and How to Fix It | 1Pane</title>
+  <meta name="description" content="Your domain has no DMARC record, leaving it open to email spoofing, spam issues, and deliverability problems. Learn what DMARC is, how to stop email spoofing, and how to add a DMARC record in under 2 minutes.">
+  <link rel="canonical" href="https://1pane.com/domain-health/no-dmarc-policy.html">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="No DMARC Policy: What It Means and How to Fix It">
+  <meta property="og:description" content="Your domain has no DMARC record. Learn what DMARC does, why it matters, and how to add one in under 2 minutes.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://1pane.com/domain-health/no-dmarc-policy.html">
+
+  <!-- Structured data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://1pane.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Domain Health", "item": "https://1pane.com/domain-health/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "No DMARC Policy" }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does 'no DMARC policy' mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It means your domain does not have a DMARC DNS record. Without one, there is no policy telling email providers how to handle messages that fail SPF or DKIM authentication, leaving your domain vulnerable to email spoofing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I add a DMARC record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add a TXT record in your DNS with the host '_dmarc' and the value 'v=DMARC1; p=none; rua=mailto:dmarc-reports@yourdomain.com'. Start with p=none to monitor, then upgrade to p=quarantine or p=reject once you confirm legitimate email passes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is DMARC important for email security?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "DMARC prevents attackers from sending emails that appear to come from your domain. It also gives you visibility into who is sending email on your behalf through aggregate reports, and improves deliverability with major providers like Google, Microsoft, and Yahoo."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can a missing DMARC record cause emails to go to spam?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Email providers like Google, Microsoft, and Yahoo use DMARC as a trust signal when deciding where to deliver messages. A missing DMARC record reduces your domain's email authentication score, which can cause legitimate emails to be filtered into spam or junk folders."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I stop someone spoofing my email domain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Set up three DNS records: SPF (to list authorised sending servers), DKIM (to add cryptographic signatures to emails), and DMARC (to tell providers what to do when authentication fails). Start DMARC with p=none to monitor, then upgrade to p=reject once all legitimate senders pass."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to add a DMARC record to your domain",
+    "description": "Step-by-step guide to adding a DMARC DNS record to protect your domain from email spoofing.",
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-22",
+    "totalTime": "PT2M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Log in to your DNS provider",
+        "text": "Sign in to the DNS management console for your domain (Cloudflare, Route 53, GoDaddy, Namecheap, etc.)."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Navigate to DNS records",
+        "text": "Open the DNS records section for the domain you want to protect."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add a TXT record",
+        "text": "Create a new TXT record with the host '_dmarc' and the value 'v=DMARC1; p=none; rua=mailto:dmarc-reports@yourdomain.com; adkim=r; aspf=r'. Set TTL to 3600."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Verify the record",
+        "text": "Wait for DNS propagation (usually a few minutes to a few hours), then verify using a DMARC lookup tool or 1Pane domain health scan."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Upgrade your policy",
+        "text": "Once you have reviewed reports and confirmed legitimate email passes authentication, change p=none to p=quarantine or p=reject."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #999; margin-bottom: 24px; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a2e; text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .updated-date { font-size: 13px; color: #999; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 20px; line-height: 1.3; }
+    .lead { font-size: 17px; color: #555; margin-bottom: 12px; }
+    .fix-summary {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e40af;
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+    }
+    h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 16px; color: #333; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #333; }
+    li { margin-bottom: 8px; }
+    a { color: #1e40af; }
+    a:hover { text-decoration: none; }
+    .code-block {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-inline {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+    .callout {
+      background: #f0f7ff;
+      border-left: 3px solid #3b82f6;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    .callout p { margin-bottom: 0; color: #1e40af; }
+    .callout-warn {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+    }
+    .callout-warn p { color: #92400e; }
+
+    /* Quick fix box */
+    .quick-fix {
+      background: #fff;
+      border: 2px solid #183D9C;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0 40px;
+    }
+    .quick-fix-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .quick-fix-badge {
+      background: #183D9C;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quick-fix-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .quick-fix ol { margin-bottom: 0; }
+
+    /* Visual diagrams */
+    .diagram {
+      margin: 28px 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .diagram-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      padding: 14px 20px 0;
+    }
+    .diagram-content {
+      padding: 20px;
+    }
+
+    /* DNS record visual */
+    .dns-record-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .dns-record-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e5e5e5;
+      font-weight: 600;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .dns-record-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      color: #333;
+    }
+    .dns-record-table tr:last-child td { border-bottom: none; }
+
+    /* DMARC flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .flow-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-icon-blue { background: #eff6ff; color: #1e40af; }
+    .flow-icon-green { background: #f0fdf4; color: #16a34a; }
+    .flow-icon-red { background: #fef2f2; color: #dc2626; }
+    .flow-icon-amber { background: #fffbeb; color: #d97706; }
+    .flow-text {
+      font-size: 14px;
+      color: #333;
+    }
+    .flow-text strong { color: #1a1a2e; }
+    .flow-arrow {
+      color: #ccc;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Policy levels */
+    .policy-levels {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .policy-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #e5e5e5;
+    }
+    .policy-badge {
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .policy-none { background: #eff6ff; color: #1e40af; }
+    .policy-quarantine { background: #fffbeb; color: #92400e; }
+    .policy-reject { background: #f0fdf4; color: #166534; }
+    .policy-desc { font-size: 14px; color: #555; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 32px 0 40px;
+    }
+    .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a {
+      color: #1e40af;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Without vs with */
+    .versus-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    @media (min-width: 540px) {
+      .versus-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .versus-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+    }
+    .versus-card-bad { background: #fef2f2; border-color: #fecaca; }
+    .versus-card-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .versus-card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; }
+    .versus-card ul { margin-bottom: 0; padding-left: 20px; }
+    .versus-card li { font-size: 14px; margin-bottom: 6px; }
+    .versus-card-bad h3 { color: #991b1b; }
+    .versus-card-bad li { color: #7f1d1d; }
+    .versus-card-good h3 { color: #166534; }
+    .versus-card-good li { color: #14532d; }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 20px 0;
+    }
+    .comparison-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: #f8f8f8;
+      border-bottom: 2px solid #e5e5e5;
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+    }
+    .comparison-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #555;
+      vertical-align: top;
+    }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table td:first-child { font-weight: 600; color: #1a1a2e; white-space: nowrap; }
+
+    /* Related issues */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (min-width: 540px) {
+      .related-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .related-card {
+      display: block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .related-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .related-card .rc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .related-card .rc-desc { font-size: 13px; color: #666; }
+
+    .cta-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .cta-box p { color: #555; margin-bottom: 16px; }
+    .cta-button {
+      display: inline-block;
+      background: #183D9C;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .cta-button:hover { background: #153580; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 16px 60px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 19px; margin-top: 36px; }
+      .quick-fix { padding: 16px; }
+      .dns-record-table td, .dns-record-table th { padding: 6px 8px; font-size: 12px; }
+      .flow-step { gap: 8px; }
+      .policy-card { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/domain-health/index.html">Domain Health</a>
+      <span class="sep">/</span>
+      <span>No DMARC Policy</span>
+    </nav>
+
+    <article>
+    <p class="updated-date">Last updated: <time datetime="2026-03-22">22 March 2026</time></p>
+
+    <h1>No DMARC policy: what it means and how to fix it</h1>
+
+    <!-- Featured snippet target -->
+    <p class="lead">
+      A missing DMARC record means your domain has no policy telling email providers how to handle
+      messages that fail authentication. This leaves your domain open to email spoofing, can cause
+      legitimate emails to land in spam, and hurts deliverability with providers like Google and
+      Microsoft. Without DMARC, you also have no visibility into who is sending email as your domain.
+    </p>
+
+    <div class="fix-summary">
+      <strong>Fix:</strong> Add a TXT record at <span class="code-inline">_dmarc.yourdomain.com</span>
+      with the value <span class="code-inline">v=DMARC1; p=none; rua=mailto:dmarc-reports@yourdomain.com</span>.
+      It takes about 2 minutes.
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#quick-fix">Quick fix (2 minutes)</a></li>
+        <li><a href="#what-is-dmarc">What is DMARC</a></li>
+        <li><a href="#what-it-looks-like">What a DMARC record looks like</a></li>
+        <li><a href="#without-vs-with">Without vs with DMARC</a></li>
+        <li><a href="#why-it-matters">Why this matters</a></li>
+        <li><a href="#is-this-your-issue">How to tell if this is your issue</a></li>
+        <li><a href="#when-it-becomes-a-problem">When this becomes a problem</a></li>
+        <li><a href="#how-to-fix">How to fix it properly</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+        <li><a href="#dmarc-vs-spf-vs-dkim">DMARC vs SPF vs DKIM</a></li>
+        <li><a href="#how-1pane-detects">How 1Pane detects this</a></li>
+        <li><a href="#related-issues">Related issues</a></li>
+      </ul>
+    </nav>
+
+    <!-- Quick fix -->
+    <div class="quick-fix" id="quick-fix">
+      <div class="quick-fix-header">
+        <span class="quick-fix-badge">Quick fix</span>
+        <span class="quick-fix-title">Add a DMARC record in 2 minutes</span>
+      </div>
+      <ol>
+        <li>Log in to your DNS provider (Cloudflare, Route 53, GoDaddy, Namecheap, or similar).</li>
+        <li>Go to the DNS records section for your domain.</li>
+        <li>Add a new <strong>TXT</strong> record:</li>
+      </ol>
+      <ul>
+        <li><strong>Host / Name:</strong> <span class="code-inline">_dmarc</span></li>
+        <li><strong>Type:</strong> TXT</li>
+        <li><strong>Value:</strong></li>
+      </ul>
+      <div class="code-block">v=DMARC1; p=none; rua=mailto:dmarc-reports@yourdomain.com; adkim=r; aspf=r</div>
+      <ul>
+        <li><strong>TTL:</strong> 3600 (or your provider's default)</li>
+      </ul>
+      <p style="margin-bottom:0; color: #555; font-size: 14px;">
+        Replace <span class="code-inline">dmarc-reports@yourdomain.com</span> with your actual email.
+        This starts DMARC in monitoring mode. You will receive reports but no emails will be blocked.
+      </p>
+    </div>
+
+    <!-- What is DMARC -->
+    <h2 id="what-is-dmarc">What is DMARC</h2>
+    <p>
+      DMARC (Domain-based Message Authentication, Reporting, and Conformance) is a DNS record that
+      tells receiving mail servers what to do when an email claiming to be from your domain fails
+      <a href="/domain-health/spf-record-missing.html">SPF</a> or DKIM checks.
+    </p>
+    <p>
+      It works alongside SPF and DKIM to form a three-layer email authentication system. SPF verifies
+      which servers are allowed to send email for your domain. DKIM adds a cryptographic signature to
+      each message. DMARC ties them together by defining a policy: what should happen when those checks fail.
+    </p>
+    <p>
+      DMARC also enables reporting. When you publish a DMARC record with a <span class="code-inline">rua</span>
+      tag, email providers send you aggregate reports showing who is sending email on your behalf, whether
+      it passed or failed authentication, and from which IP addresses. This gives you visibility into
+      both legitimate senders and potential spoofing attempts.
+    </p>
+
+    <!-- What a DMARC record looks like -->
+    <h2 id="what-it-looks-like">What a DMARC record looks like</h2>
+    <p>A DMARC record is a TXT entry in your DNS, published at <span class="code-inline">_dmarc.yourdomain.com</span>.</p>
+
+    <!-- Visual: DNS record table -->
+    <div class="diagram" role="figure" aria-label="Example DMARC TXT record as it appears in a DNS management console">
+      <div class="diagram-title">DMARC TXT record in DNS</div>
+      <div class="diagram-content">
+        <table class="dns-record-table">
+          <thead>
+            <tr><th>Type</th><th>Host</th><th>Value</th><th>TTL</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TXT</td>
+              <td>_dmarc</td>
+              <td>v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com</td>
+              <td>3600</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p>Here is a full example record with each tag explained:</p>
+    <div class="code-block"><span class="comment"># Tag breakdown</span>
+v=DMARC1;           <span class="comment"># Protocol version (required, must be first)</span>
+p=quarantine;        <span class="comment"># Policy: none | quarantine | reject</span>
+rua=mailto:dmarc@example.com;  <span class="comment"># Aggregate report destination</span>
+ruf=mailto:forensics@example.com;  <span class="comment"># Forensic report destination (optional)</span>
+adkim=r;             <span class="comment"># DKIM alignment: r (relaxed) | s (strict)</span>
+aspf=r;              <span class="comment"># SPF alignment: r (relaxed) | s (strict)</span>
+pct=100              <span class="comment"># Percentage of messages to apply policy to</span></div>
+
+    <!-- Visual: DMARC authentication flow -->
+    <div class="diagram" role="figure" aria-label="Flow diagram showing how DMARC validates email through SPF and DKIM checks">
+      <div class="diagram-title">How DMARC authentication works</div>
+      <div class="diagram-content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9993;</div>
+            <div class="flow-text"><strong>Email arrives</strong> at the receiving mail server</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9745;</div>
+            <div class="flow-text"><strong>SPF check:</strong> Was this sent from an authorised server?</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9745;</div>
+            <div class="flow-text"><strong>DKIM check:</strong> Is the cryptographic signature valid?</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128220;</div>
+            <div class="flow-text"><strong>DMARC policy lookup:</strong> Check <span class="code-inline">_dmarc.domain.com</span> for instructions</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-green">&#10003;</div>
+            <div class="flow-text"><strong>Both pass:</strong> Email is delivered normally</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#10007;</div>
+            <div class="flow-text"><strong>Fails:</strong> Apply policy (none, quarantine, or reject)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual: Policy levels -->
+    <div class="diagram" role="figure" aria-label="Comparison of DMARC policy levels: none, quarantine, and reject">
+      <div class="diagram-title">DMARC policy levels</div>
+      <div class="diagram-content">
+        <div class="policy-levels">
+          <div class="policy-card">
+            <span class="policy-badge policy-none">p=none</span>
+            <span class="policy-desc"><strong>Monitor only.</strong> Emails that fail are still delivered. You receive reports to understand your email traffic. Start here.</span>
+          </div>
+          <div class="policy-card">
+            <span class="policy-badge policy-quarantine">p=quarantine</span>
+            <span class="policy-desc"><strong>Flag suspicious email.</strong> Failing emails are sent to spam or junk. Use this once you trust your SPF and DKIM setup.</span>
+          </div>
+          <div class="policy-card">
+            <span class="policy-badge policy-reject">p=reject</span>
+            <span class="policy-desc"><strong>Block spoofed email.</strong> Failing emails are rejected entirely. This is the strongest protection against email spoofing.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Without vs with DMARC -->
+    <h2 id="without-vs-with">Without vs with DMARC</h2>
+    <p>The difference is straightforward. Think of DMARC as a policy sign on your front door.</p>
+    <div class="versus-grid">
+      <div class="versus-card versus-card-bad">
+        <h3>Without DMARC</h3>
+        <ul>
+          <li>Email providers guess what to do with suspicious messages</li>
+          <li>Spoofed emails may be delivered to inboxes</li>
+          <li>No visibility into who is sending as your domain</li>
+          <li>Legitimate emails more likely to land in spam</li>
+        </ul>
+      </div>
+      <div class="versus-card versus-card-good">
+        <h3>With DMARC</h3>
+        <ul>
+          <li>Clear policy tells providers how to handle failures</li>
+          <li>Spoofed emails are flagged, quarantined, or blocked</li>
+          <li>Aggregate reports show all sending activity</li>
+          <li>Improved deliverability with Google, Microsoft, and Yahoo</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Why this matters -->
+    <h2 id="why-it-matters">Why this matters</h2>
+    <p>
+      When no DMARC record exists, email providers make their own decisions about suspicious messages.
+      Most will still deliver them, which means spoofed emails can reach inboxes unchallenged. This
+      creates several problems:
+    </p>
+    <ul>
+      <li><strong>Email spoofing.</strong> Anyone can send phishing emails that look like they come from your domain. This is used to target your customers, partners, and employees.</li>
+      <li><strong>No visibility.</strong> Without DMARC reporting, you cannot see who is sending email using your domain name. You have no way to detect abuse.</li>
+      <li><strong>Deliverability impact.</strong> Google, Microsoft, and Yahoo increasingly require DMARC. As of February 2024, Google and Yahoo require DMARC for domains sending more than 5,000 emails per day. Missing it can hurt your delivery rates.</li>
+      <li><strong>Brand damage.</strong> Spoofed emails erode trust in your brand and can lead to your domain being blocklisted by email providers.</li>
+      <li><strong>Compliance requirements.</strong> Many industries (finance, healthcare, government) require DMARC as part of their security standards. PCI DSS 4.0 also recommends it.</li>
+    </ul>
+    <p>
+      DMARC is now a standard requirement for modern email security and is increasingly enforced by
+      major providers like Google and Microsoft. It is no longer optional for domains that send email.
+    </p>
+
+    <!-- How to tell if this is your issue -->
+    <h2 id="is-this-your-issue">How to tell if this is your issue</h2>
+    <p>
+      Not sure if a missing DMARC record is causing your problem? These are common signs that point to
+      email authentication issues:
+    </p>
+    <ul>
+      <li><strong>Your emails are going to spam.</strong> If recipients report that your messages land in junk or spam folders, a missing DMARC record may be a contributing factor. Email providers use DMARC as a trust signal when deciding where to place messages.</li>
+      <li><strong>You received a security warning from Google or Microsoft.</strong> Both providers now send alerts to domain administrators when they detect authentication gaps. If you received a notification about email authentication, check your DMARC record first.</li>
+      <li><strong>Someone reported a phishing email from your domain.</strong> If a customer, partner, or colleague received a suspicious email that appeared to come from your domain, a missing DMARC record means there was nothing in place to stop it.</li>
+      <li><strong>You are setting up email on a new domain.</strong> If you have just registered a domain or are configuring email for the first time, adding DMARC alongside your <a href="/domain-health/spf-record-missing.html">SPF record</a> should be part of your initial setup.</li>
+      <li><strong>A domain health scan flagged this issue.</strong> Tools like 1Pane check for DMARC as part of a broader <a href="/domain-health/index.html">domain health assessment</a>. If this was flagged in a scan, it means the record is either missing or invalid.</li>
+    </ul>
+
+    <!-- When this becomes a problem -->
+    <h2 id="when-it-becomes-a-problem">When this becomes a problem</h2>
+    <p>A missing DMARC record does not cause immediate failures, but it creates ongoing risk. The impact becomes visible when:</p>
+    <ul>
+      <li><strong>Someone spoofs your domain.</strong> A phishing attack using your domain can happen at any time. Without DMARC, there is nothing to prevent it and no way to detect it.</li>
+      <li><strong>You send transactional email.</strong> If your application sends order confirmations, password resets, or invoices, DMARC protects those messages from being impersonated.</li>
+      <li><strong>You scale email volume.</strong> Bulk senders (5,000+ messages/day) are now required to have DMARC by major providers. Without it, your deliverability drops. This is also affected by <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a> that prevent records from being found.</li>
+      <li><strong>You use third-party senders.</strong> If services like Mailchimp, SendGrid, or HubSpot send email on your behalf, DMARC reports help you track whether they are properly authenticated.</li>
+      <li><strong>A customer reports a phishing email.</strong> At that point you are already dealing with the consequences rather than preventing the problem.</li>
+    </ul>
+
+    <!-- How to fix it properly -->
+    <h2 id="how-to-fix">How to fix it properly</h2>
+    <p>Follow these steps to add DMARC to your domain and move toward full email spoofing protection.</p>
+
+    <h3>Step 1: Check your SPF and DKIM records</h3>
+    <p>
+      DMARC depends on SPF and DKIM. Before adding DMARC, make sure your domain has a valid
+      <a href="/domain-health/spf-record-missing.html">SPF record</a> and that your email
+      provider has enabled DKIM signing. Without these, DMARC has nothing to enforce.
+    </p>
+
+    <h3>Step 2: Start with a monitoring policy</h3>
+    <p>Add a DMARC record with <span class="code-inline">p=none</span> so you can collect data before enforcing.</p>
+    <div class="code-block">v=DMARC1; p=none; rua=mailto:dmarc-reports@yourdomain.com; adkim=r; aspf=r</div>
+    <p>
+      The <span class="code-inline">rua</span> tag tells email providers where to send daily aggregate
+      reports in XML format. These reports list every IP address that sent email using your domain and
+      whether it passed SPF and DKIM.
+    </p>
+
+    <h3>Step 3: Review your reports</h3>
+    <p>
+      After a week or two, review the DMARC reports. Look for legitimate sending services that may not
+      be properly configured. Common sources include:
+    </p>
+    <ul>
+      <li>Your email hosting provider (Google Workspace, Microsoft 365)</li>
+      <li>Marketing platforms (Mailchimp, HubSpot, SendGrid)</li>
+      <li>Transactional email services (Postmark, Amazon SES)</li>
+      <li>Helpdesk or CRM tools that send from your domain</li>
+    </ul>
+    <p>Make sure each of these is included in your SPF record and has DKIM configured.</p>
+
+    <h3>Step 4: Tighten your policy</h3>
+    <p>Once all legitimate senders pass authentication, upgrade your policy in stages:</p>
+    <div class="code-block"><span class="comment"># Stage 1: Quarantine 10% of failing messages</span>
+v=DMARC1; p=quarantine; pct=10; rua=mailto:dmarc-reports@yourdomain.com
+
+<span class="comment"># Stage 2: Quarantine all failing messages</span>
+v=DMARC1; p=quarantine; pct=100; rua=mailto:dmarc-reports@yourdomain.com
+
+<span class="comment"># Stage 3: Reject all failing messages (full protection)</span>
+v=DMARC1; p=reject; rua=mailto:dmarc-reports@yourdomain.com</div>
+
+    <div class="callout">
+      <p>
+        <strong>Tip:</strong> Use the <span class="code-inline">pct</span> tag to gradually increase
+        enforcement. Setting <span class="code-inline">pct=10</span> applies the policy to only 10%
+        of failing messages, so you can monitor the impact before going to 100%.
+      </p>
+    </div>
+
+    <h3>Step 5: Verify your record</h3>
+    <p>
+      After adding the record, verify it is live. DNS propagation usually takes a few minutes to a few hours.
+      If the record is not appearing, check for <a href="/domain-health/dns-lookup-failed.html">DNS resolution issues</a>
+      that might be preventing lookups. You can check by running:
+    </p>
+    <div class="code-block">dig TXT _dmarc.yourdomain.com</div>
+    <p>Or use a 1Pane domain health scan to verify the record is detected and valid.</p>
+
+    <!-- Common mistakes -->
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+      <li>
+        <strong>Wrong hostname.</strong> The record must be at
+        <span class="code-inline">_dmarc.yourdomain.com</span>, not at the root domain. Some DNS providers
+        add the domain suffix automatically, so you only need to enter <span class="code-inline">_dmarc</span>
+        as the host. Others require the full <span class="code-inline">_dmarc.yourdomain.com</span>. Check
+        your provider's documentation.
+      </li>
+      <li>
+        <strong>Missing <span class="code-inline">v=DMARC1</span>.</strong> The record must start with
+        <span class="code-inline">v=DMARC1</span> exactly. Typos, extra spaces, or missing semicolons
+        will cause email providers to ignore the entire record.
+      </li>
+      <li>
+        <strong>Multiple DMARC records.</strong> Your domain must have exactly one DMARC TXT record. If
+        more than one exists, email providers may ignore all of them. Remove duplicates before adding a new one.
+      </li>
+      <li>
+        <strong>Jumping straight to <span class="code-inline">p=reject</span>.</strong> If you enforce
+        rejection before verifying that all legitimate senders are authenticated, you will block your own
+        email. Always start with <span class="code-inline">p=none</span> and review reports first.
+      </li>
+      <li>
+        <strong>No SPF record.</strong> DMARC checks SPF alignment. If you have no
+        <a href="/domain-health/spf-record-missing.html">SPF record</a>, half of DMARC's validation
+        is missing. Set up SPF before or alongside DMARC.
+      </li>
+      <li>
+        <strong>Ignoring subdomains.</strong> By default, subdomains inherit the parent domain's DMARC policy.
+        If you need different policies for subdomains, use the <span class="code-inline">sp</span> tag
+        (e.g. <span class="code-inline">sp=reject</span>).
+      </li>
+    </ul>
+
+    <!-- DMARC vs SPF vs DKIM -->
+    <h2 id="dmarc-vs-spf-vs-dkim">DMARC vs SPF vs DKIM: what is the difference</h2>
+    <p>
+      These three protocols work together to protect your domain from email spoofing. Each handles a different
+      part of email authentication.
+    </p>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Protocol</th><th>What it does</th><th>Record type</th><th>Without it</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SPF</td>
+          <td>Lists which servers are allowed to send email for your domain</td>
+          <td>TXT at root domain</td>
+          <td>Any server can send email as your domain</td>
+        </tr>
+        <tr>
+          <td>DKIM</td>
+          <td>Adds a cryptographic signature to each email so receivers can verify it was not altered</td>
+          <td>TXT at selector._domainkey</td>
+          <td>Emails can be tampered with in transit without detection</td>
+        </tr>
+        <tr>
+          <td>DMARC</td>
+          <td>Tells receivers what to do when SPF or DKIM fails, and sends you reports</td>
+          <td>TXT at _dmarc</td>
+          <td>No enforcement policy, no visibility into email abuse</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      SPF and DKIM each solve part of the problem. DMARC ties them together by adding a policy layer and
+      reporting. For full email spoofing protection, you need all three. If your domain is also missing
+      an SPF record, see <a href="/domain-health/spf-record-missing.html">SPF record missing</a>.
+    </p>
+
+    <!-- How 1Pane detects this -->
+    <h2 id="how-1pane-detects">How 1Pane detects this</h2>
+    <p>
+      When you scan a domain with 1Pane, it queries the DNS TXT records at
+      <span class="code-inline">_dmarc.yourdomain.com</span>. If no record is found, or the record
+      does not contain a valid DMARC policy starting with <span class="code-inline">v=DMARC1</span>,
+      the scan flags it as a critical issue.
+    </p>
+    <p>
+      1Pane also checks for related problems that affect DMARC effectiveness, including
+      <a href="/domain-health/spf-record-missing.html">missing SPF records</a> and
+      <a href="/domain-health/dns-lookup-failed.html">DNS resolution failures</a>. Changes between scans
+      are tracked, so you can verify that your fix has taken effect.
+    </p>
+
+    <!-- Related issues -->
+    <h2 id="related-issues">Related issues</h2>
+    <p>These domain health issues are closely related to DMARC and email authentication:</p>
+    <div class="related-grid">
+      <a href="/domain-health/spf-record-missing.html" class="related-card">
+        <div class="rc-title">SPF record missing</div>
+        <div class="rc-desc">Without SPF, anyone can send email pretending to be your domain. DMARC depends on SPF to work.</div>
+      </a>
+      <a href="/domain-health/dns-lookup-failed.html" class="related-card">
+        <div class="rc-title">DNS lookup failed</div>
+        <div class="rc-desc">If DNS resolution fails, email providers cannot find your DMARC, SPF, or MX records.</div>
+      </a>
+      <a href="/domain-health/no-a-record.html" class="related-card">
+        <div class="rc-title">No A record</div>
+        <div class="rc-desc">A missing A record means your domain does not resolve to an IP address, affecting reachability.</div>
+      </a>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <p>Scan your domain with 1Pane to check DMARC, SPF, DNS and SSL in one place.</p>
+      <a href="/dashboard" class="cta-button">Scan your domain now</a>
+    </div>
+
+    </article>
+
+    <div class="footer">
+      <a href="/domain-health/index.html">Domain Health Guides</a> &middot; <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>

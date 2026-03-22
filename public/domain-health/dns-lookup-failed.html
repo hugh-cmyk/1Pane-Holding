@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNS Lookup Failed: What It Means and How to Fix It | 1Pane</title>
+  <meta name="description" content="Your domain's DNS lookup failed. This means your website, email, and services may be completely unreachable. Learn why DNS resolution fails, how to diagnose 'server not found' errors, and how to fix the issue.">
+  <link rel="canonical" href="https://1pane.com/domain-health/dns-lookup-failed.html">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="DNS Lookup Failed: What It Means and How to Fix It">
+  <meta property="og:description" content="Your domain's DNS lookup failed. Learn why this happens, what it affects, and how to fix it quickly.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://1pane.com/domain-health/dns-lookup-failed.html">
+
+  <!-- Structured data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://1pane.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Domain Health", "item": "https://1pane.com/domain-health/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "DNS Lookup Failed" }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does 'DNS lookup failed' mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It means the DNS resolver could not retrieve records for your domain. Your website, email, and all services tied to the domain may be completely unreachable. Common browser errors include 'server not found' and 'DNS_PROBE_FINISHED_NXDOMAIN'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is my website showing 'server not found'?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 'server not found' error usually means DNS resolution failed for your domain. This can be caused by expired domain registration, incorrect nameservers, a deleted DNS zone, or a temporary resolver outage. Check your domain registration and nameserver settings first."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a DNS lookup failure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Start by checking that your domain registration has not expired. Then verify your nameservers match your DNS provider. Test with public resolvers like 8.8.8.8 (Google) and 1.1.1.1 (Cloudflare). If everything looks correct, contact your DNS provider."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can a DNS failure affect my email?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Email delivery depends on DNS to locate MX records, SPF records, and DMARC policies. If DNS lookups fail, incoming email cannot be delivered, outgoing email may fail authentication, and your domain loses all email functionality."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does DNS propagation take?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most DNS changes propagate within a few minutes to a few hours. Full global propagation can take up to 48 hours in rare cases. If you recently changed nameservers, allow time for the change to reach all resolvers before concluding there is a problem."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is a DNS lookup failure always a real problem?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not always. A single failed lookup can be caused by a temporary resolver timeout or network issue. If the failure persists across multiple resolvers (e.g. 8.8.8.8 and 1.1.1.1) and repeated tests, it indicates a real configuration problem that needs to be fixed."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to fix a DNS lookup failure",
+    "description": "Step-by-step guide to diagnosing and fixing DNS resolution failures for your domain.",
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-22",
+    "totalTime": "PT5M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Check domain registration",
+        "text": "Verify that your domain registration has not expired. Log in to your registrar and confirm the domain is active."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Verify nameservers",
+        "text": "Check that the nameservers listed at your registrar match your DNS provider (e.g. Cloudflare, Route 53, or your hosting company)."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Test with public DNS resolvers",
+        "text": "Run 'dig yourdomain.com @8.8.8.8' and 'dig yourdomain.com @1.1.1.1' to test resolution from Google and Cloudflare public DNS."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Check the DNS zone",
+        "text": "Log in to your DNS provider and verify that the DNS zone for your domain exists and contains records."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Contact your DNS provider",
+        "text": "If nameservers are correct and the zone exists but lookups still fail, contact your DNS provider or check their status page."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #999; margin-bottom: 24px; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a2e; text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .updated-date { font-size: 13px; color: #999; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 20px; line-height: 1.3; }
+    .lead { font-size: 17px; color: #555; margin-bottom: 12px; }
+    .fix-summary {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e40af;
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+    }
+    h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 16px; color: #333; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #333; }
+    li { margin-bottom: 8px; }
+    a { color: #1e40af; }
+    a:hover { text-decoration: none; }
+    .code-block {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-inline {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+    .callout {
+      background: #f0f7ff;
+      border-left: 3px solid #3b82f6;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    .callout p { margin-bottom: 0; color: #1e40af; }
+    .callout-warn {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+    }
+    .callout-warn p { color: #92400e; }
+
+    /* Quick fix box */
+    .quick-fix {
+      background: #fff;
+      border: 2px solid #183D9C;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0 40px;
+    }
+    .quick-fix-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .quick-fix-badge {
+      background: #183D9C;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quick-fix-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    /* Visual diagrams */
+    .diagram {
+      margin: 28px 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .diagram-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      padding: 14px 20px 0;
+    }
+    .diagram-content {
+      padding: 20px;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+    }
+    .flow-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-icon-blue { background: #eff6ff; color: #1e40af; }
+    .flow-icon-green { background: #f0fdf4; color: #16a34a; }
+    .flow-icon-red { background: #fef2f2; color: #dc2626; }
+    .flow-text { font-size: 14px; color: #333; }
+    .flow-text strong { color: #1a1a2e; }
+    .flow-arrow { color: #ccc; font-size: 18px; text-align: center; width: 100%; }
+    .flow-fail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .simple-box ul { margin-bottom: 0; }
+    .simple-box li { font-size: 15px; }
+
+    /* Temporary vs real */
+    .versus-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    @media (min-width: 540px) {
+      .versus-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .versus-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+    }
+    .versus-card-temp { background: #fffbeb; border-color: #fde68a; }
+    .versus-card-real { background: #fef2f2; border-color: #fecaca; }
+    .versus-card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; }
+    .versus-card ul { margin-bottom: 0; padding-left: 20px; }
+    .versus-card li { font-size: 14px; margin-bottom: 6px; }
+    .versus-card-temp h3 { color: #92400e; }
+    .versus-card-temp li { color: #78350f; }
+    .versus-card-real h3 { color: #991b1b; }
+    .versus-card-real li { color: #7f1d1d; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 32px 0 40px;
+    }
+    .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: #1e40af; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Related issues */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (min-width: 540px) {
+      .related-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .related-card {
+      display: block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .related-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .related-card .rc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .related-card .rc-desc { font-size: 13px; color: #666; }
+
+    .cta-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .cta-box p { color: #555; margin-bottom: 16px; }
+    .cta-button {
+      display: inline-block;
+      background: #183D9C;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .cta-button:hover { background: #153580; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 16px 60px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 19px; margin-top: 36px; }
+      .quick-fix { padding: 16px; }
+      .flow-step { gap: 8px; }
+      .versus-card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/domain-health/index.html">Domain Health</a>
+      <span class="sep">/</span>
+      <span>DNS Lookup Failed</span>
+    </nav>
+
+    <article>
+    <p class="updated-date">Last updated: <time datetime="2026-03-22">22 March 2026</time></p>
+
+    <h1>DNS lookup failed: what it means and how to fix it</h1>
+
+    <!-- Featured snippet target -->
+    <p class="lead">
+      A DNS lookup failure means your domain cannot be resolved. If your website is not loading and
+      visitors see "server not found" or "this site can't be reached", a DNS failure is the most
+      likely cause. Email stops working, APIs go offline, and every service tied to the domain becomes
+      unreachable. This is the most urgent domain health issue because it takes everything down at once.
+    </p>
+
+    <div class="fix-summary">
+      <strong>Fix:</strong> Check that your domain registration has not expired, verify your nameservers
+      match your DNS provider, and test with <span class="code-inline">dig yourdomain.com @8.8.8.8</span>.
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#quick-fix">Quick fix (5 minutes)</a></li>
+        <li><a href="#what-is-dns">What is DNS</a></li>
+        <li><a href="#how-dns-works">How DNS resolution works</a></li>
+        <li><a href="#simple-failure">How to think about a DNS failure (simple)</a></li>
+        <li><a href="#is-this-your-issue">How to tell if this is your issue</a></li>
+        <li><a href="#why-it-matters">Why this matters</a></li>
+        <li><a href="#temporary-vs-real">When this is temporary vs a real problem</a></li>
+        <li><a href="#how-to-fix">How to fix it properly</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+        <li><a href="#how-1pane-detects">How 1Pane detects this</a></li>
+        <li><a href="#faq">Frequently asked questions</a></li>
+        <li><a href="#related-issues">Related issues</a></li>
+      </ul>
+    </nav>
+
+    <!-- Quick fix -->
+    <div class="quick-fix" id="quick-fix">
+      <div class="quick-fix-header">
+        <span class="quick-fix-badge">Quick fix</span>
+        <span class="quick-fix-title">Diagnose a DNS failure in 5 minutes</span>
+      </div>
+      <ol>
+        <li><strong>Is the domain registered?</strong> Log in to your registrar and confirm it has not expired.</li>
+        <li><strong>Are the nameservers correct?</strong> Check that the nameservers at your registrar match your DNS provider (Cloudflare, Route 53, GoDaddy, etc.).</li>
+        <li><strong>Test with Google DNS:</strong></li>
+      </ol>
+      <div class="code-block">dig yourdomain.com @8.8.8.8</div>
+      <ol start="4">
+        <li><strong>Test with Cloudflare DNS:</strong></li>
+      </ol>
+      <div class="code-block">dig yourdomain.com @1.1.1.1</div>
+      <ol start="5">
+        <li><strong>Check the DNS zone.</strong> Log in to your DNS provider and verify the zone exists and contains records.</li>
+      </ol>
+      <p style="margin-bottom:0; color: #555; font-size: 14px;">
+        If both public resolvers fail, the problem is with your domain configuration, not your local
+        network. If only one fails, it may be a temporary resolver issue. If these checks all pass,
+        your DNS is likely working and the issue may be elsewhere.
+      </p>
+    </div>
+
+    <!-- What is DNS -->
+    <h2 id="what-is-dns">What is DNS</h2>
+    <p>
+      DNS (Domain Name System) translates your domain name into IP addresses and other records that
+      computers use to route traffic and deliver email. Every time someone visits your website, sends
+      you an email, or connects to your API, a DNS lookup happens first.
+    </p>
+    <p>
+      A DNS lookup failure means the resolver could not get a response when querying for your domain's
+      records. Without that response, nothing works. The browser shows "server not found", email bounces
+      (because MX, <a href="/domain-health/spf-record-missing.html">SPF</a>, and
+      <a href="/domain-health/no-dmarc-policy.html">DMARC</a> records all depend on DNS), and any
+      service tied to your domain becomes unreachable.
+    </p>
+
+    <!-- How DNS resolution works -->
+    <h2 id="how-dns-works">How DNS resolution works</h2>
+    <p>
+      When a browser or email server needs to reach your domain, it follows a chain of lookups.
+      A failure at any point in this chain will cause the lookup to fail.
+    </p>
+
+    <div class="diagram" role="figure" aria-label="Flow diagram showing how DNS resolution works and where failures can occur">
+      <div class="diagram-title">DNS resolution flow</div>
+      <div class="diagram-content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#127760;</div>
+            <div class="flow-text"><strong>Browser or app</strong> needs to reach yourdomain.com</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128269;</div>
+            <div class="flow-text"><strong>Recursive resolver</strong> (e.g. 8.8.8.8) receives the query <span class="flow-fail-label">Can fail here</span></div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128450;</div>
+            <div class="flow-text"><strong>Root server</strong> directs to the TLD nameserver (.com, .co.uk)</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128451;</div>
+            <div class="flow-text"><strong>TLD nameserver</strong> directs to your domain's authoritative nameserver <span class="flow-fail-label">Can fail here</span></div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#9745;</div>
+            <div class="flow-text"><strong>Authoritative nameserver</strong> returns the IP address (A record) <span class="flow-fail-label">Can fail here</span></div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-green">&#10003;</div>
+            <div class="flow-text"><strong>Success:</strong> Browser connects to the IP address and loads your site</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      The most common failure points are: the resolver cannot reach your nameserver (misconfigured or
+      unreachable), the TLD has no nameserver record for your domain (expired registration), or your
+      authoritative nameserver does not have a zone for your domain (deleted DNS zone).
+    </p>
+
+    <!-- Simple failure explanation -->
+    <h2 id="simple-failure">How to think about a DNS failure (simple)</h2>
+    <p>If you are not familiar with DNS, here is the simplest way to understand what has happened:</p>
+    <div class="simple-box">
+      <ul>
+        <li>DNS is like a <strong>phone directory for your domain</strong>. It maps your domain name to the addresses of your servers.</li>
+        <li>A DNS failure means the directory entry for your domain <strong>cannot be found</strong> or has <strong>no usable records</strong>.</li>
+        <li>In both cases, nothing can connect to your domain. The browser has nowhere to go.</li>
+        <li>This affects <strong>everything at once</strong>: your website, your email, your API, and any service that uses your domain name.</li>
+      </ul>
+    </div>
+    <p>
+      Unlike issues such as a <a href="/domain-health/spf-record-missing.html">missing SPF record</a> or
+      <a href="/domain-health/no-dmarc-policy.html">missing DMARC policy</a> (which affect email
+      specifically), a DNS failure is a total outage. Nothing works until DNS is restored.
+    </p>
+
+    <!-- How to tell if this is your issue -->
+    <h2 id="is-this-your-issue">How to tell if this is your issue</h2>
+    <p>These are common signs that a DNS lookup failure is affecting your domain:</p>
+    <ul>
+      <li><strong>Your website is not loading at all.</strong> The browser shows "server not found", "DNS_PROBE_FINISHED_NXDOMAIN", or "This site can't be reached". This is different from a slow page or a 500 error, which indicate the server was found but could not respond.</li>
+      <li><strong>Email has stopped working.</strong> If incoming email is bouncing and outgoing email is failing authentication, DNS may be down. Email relies on MX, <a href="/domain-health/spf-record-missing.html">SPF</a>, and <a href="/domain-health/no-dmarc-policy.html">DMARC</a> records, all of which require DNS.</li>
+      <li><strong>Your domain was flagged as unreachable.</strong> A domain health scan or uptime monitor reported that your domain could not be resolved.</li>
+      <li><strong>Multiple services are down simultaneously.</strong> If your website, email, and API all fail at the same time, DNS is the most likely common cause.</li>
+      <li><strong>You recently changed nameservers or registrars.</strong> DNS failures often follow nameserver changes if the new configuration is incomplete or has not propagated yet.</li>
+    </ul>
+
+    <!-- Why this matters -->
+    <h2 id="why-it-matters">Why this matters</h2>
+    <p>
+      DNS is the first step in every connection to your domain. If it fails, nothing else has a chance
+      to work. It is the foundation layer for your entire online presence:
+    </p>
+    <ul>
+      <li><strong>Your site is completely unreachable.</strong> Visitors see "server not found" errors. This is not a degraded experience; it is a total outage.</li>
+      <li><strong>Email delivery stops.</strong> Mail servers rely on DNS to find MX records. If lookups fail, incoming email cannot be delivered to your domain.</li>
+      <li><strong>Email authentication breaks.</strong> <a href="/domain-health/spf-record-missing.html">SPF</a>, <a href="/domain-health/no-dmarc-policy.html">DMARC</a>, and DKIM records all live in DNS. If DNS is down, email authentication fails entirely.</li>
+      <li><strong>All dependent services break.</strong> APIs, CDNs, subdomains, and any third-party service that resolves your domain will also fail.</li>
+      <li><strong>SEO impact.</strong> Search engine crawlers that cannot resolve your domain will eventually deindex your pages. Prolonged DNS failures can take weeks to recover from in search rankings.</li>
+      <li><strong>Lost revenue.</strong> For e-commerce and SaaS businesses, a DNS outage means customers cannot access your product. Every minute of downtime has a direct cost.</li>
+    </ul>
+
+    <!-- Temporary vs real problem -->
+    <h2 id="temporary-vs-real">When this is temporary vs a real problem</h2>
+    <p>Not all DNS lookup failures indicate a configuration problem. It is important to distinguish between temporary issues and persistent ones.</p>
+    <div class="versus-grid">
+      <div class="versus-card versus-card-temp">
+        <h3>Temporary (usually resolves itself)</h3>
+        <ul>
+          <li>A single resolver timed out</li>
+          <li>Brief network disruption between resolver and nameserver</li>
+          <li>You just changed nameservers (propagation in progress)</li>
+          <li>Your DNS provider had a short outage</li>
+          <li>Fails from one resolver but succeeds from another</li>
+        </ul>
+      </div>
+      <div class="versus-card versus-card-real">
+        <h3>Real problem (needs action)</h3>
+        <ul>
+          <li>Fails from multiple resolvers (8.8.8.8 and 1.1.1.1)</li>
+          <li>Domain registration has expired</li>
+          <li>Nameservers at registrar do not match DNS provider</li>
+          <li>DNS zone was accidentally deleted</li>
+          <li>Failure persists for more than an hour</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>
+        <strong>Quick test:</strong> Run <span class="code-inline">dig yourdomain.com @8.8.8.8</span>
+        and <span class="code-inline">dig yourdomain.com @1.1.1.1</span>. If both fail, the problem
+        is with your domain, not the resolver. If only one fails, wait 15 minutes and test again.
+      </p>
+    </div>
+
+    <!-- How to fix it properly -->
+    <h2 id="how-to-fix">How to fix it properly</h2>
+    <p>Work through these steps in order. Each one rules out a common cause.</p>
+
+    <h3>Step 1: Check your domain registration</h3>
+    <p>
+      Log in to your domain registrar and confirm the domain is active. If the registration has expired,
+      the registrar removes nameserver delegation and all DNS lookups will fail. Most registrars offer
+      a grace period for renewal after expiry.
+    </p>
+
+    <h3>Step 2: Verify your nameservers</h3>
+    <p>
+      Check that the nameservers listed at your registrar match the ones your DNS provider expects. For
+      example, if you use Cloudflare, the nameservers should be something like
+      <span class="code-inline">ada.ns.cloudflare.com</span> and
+      <span class="code-inline">bob.ns.cloudflare.com</span>. Mismatched nameservers are the most
+      common cause of DNS lookup failures.
+    </p>
+    <div class="code-block"><span class="comment"># Check what nameservers are configured</span>
+dig yourdomain.com NS</div>
+
+    <h3>Step 3: Test with multiple public resolvers</h3>
+    <p>
+      Query your domain from at least two different public DNS resolvers. This confirms whether the
+      problem is global or specific to one resolver.
+    </p>
+    <div class="code-block"><span class="comment"># Google Public DNS</span>
+dig yourdomain.com @8.8.8.8
+
+<span class="comment"># Cloudflare DNS</span>
+dig yourdomain.com @1.1.1.1
+
+<span class="comment"># Quad9 DNS</span>
+dig yourdomain.com @9.9.9.9</div>
+
+    <h3>Step 4: Check the DNS zone exists</h3>
+    <p>
+      Log in to your DNS provider and verify that the DNS zone for your domain exists and contains
+      records. If the zone was accidentally deleted, nameservers will still point to the provider
+      but there will be nothing to serve. You will need to recreate the zone and re-add your records.
+    </p>
+    <p>
+      At minimum, your zone should contain an <a href="/domain-health/no-a-record.html">A record</a>
+      (pointing to your server's IP address) and an NS record.
+    </p>
+
+    <h3>Step 5: Wait for propagation (if you made recent changes)</h3>
+    <p>
+      If you recently changed nameservers, registrars, or DNS providers, allow time for the change to
+      propagate. Most changes take effect within a few hours, but full global propagation can take up
+      to 48 hours. During this period, some resolvers may return the old (or no) result.
+    </p>
+
+    <h3>Step 6: Contact your DNS provider</h3>
+    <p>
+      If everything above looks correct but lookups still fail, the issue may be on your DNS provider's
+      side. Check their status page for ongoing incidents, or contact support with the output of your
+      <span class="code-inline">dig</span> commands.
+    </p>
+
+    <!-- Common mistakes -->
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+      <li>
+        <strong>Mismatched nameservers.</strong> Your registrar points to one set of nameservers, but
+        your DNS records are configured at a different provider. This is the single most common cause of
+        DNS lookup failures. Always make sure both sides match.
+      </li>
+      <li>
+        <strong>Expired domain.</strong> If the domain registration lapses, nameservers are removed and
+        all DNS lookups fail immediately. Set up auto-renewal to avoid this.
+      </li>
+      <li>
+        <strong>Deleted DNS zone.</strong> If you accidentally delete your DNS zone at your provider,
+        all records disappear even though the nameservers still point there. The nameservers respond
+        with NXDOMAIN (domain not found) for every query.
+      </li>
+      <li>
+        <strong>Assuming the problem is temporary.</strong> A single failed lookup can be a resolver
+        glitch. But if lookups fail from multiple resolvers for more than an hour, there is a real
+        configuration problem. Do not wait days before investigating.
+      </li>
+      <li>
+        <strong>Changing nameservers without migrating records.</strong> If you switch DNS providers,
+        you need to recreate all your DNS records at the new provider before pointing the nameservers
+        there. Otherwise, the new provider has no records to serve.
+      </li>
+      <li>
+        <strong>Ignoring downstream effects.</strong> DNS failures break email authentication records
+        (<a href="/domain-health/spf-record-missing.html">SPF</a>,
+        <a href="/domain-health/no-dmarc-policy.html">DMARC</a>) and
+        <a href="/domain-health/no-a-record.html">A records</a>. When DNS is restored, verify that
+        all your records are intact.
+      </li>
+    </ul>
+
+    <!-- How 1Pane detects this -->
+    <h2 id="how-1pane-detects">How 1Pane detects this</h2>
+    <p>
+      1Pane queries multiple DNS record types (A, AAAA, MX, NS, TXT, CNAME) during a scan. If the
+      resolver returns errors or timeouts across all record types, the scan flags it as a DNS lookup
+      failure. Partial failures (where some record types succeed and others do not) are reported
+      separately as warnings.
+    </p>
+    <p>
+      1Pane also checks for related issues that DNS failures cause, including missing
+      <a href="/domain-health/no-a-record.html">A records</a>,
+      <a href="/domain-health/spf-record-missing.html">SPF records</a>, and
+      <a href="/domain-health/no-dmarc-policy.html">DMARC records</a>. When DNS is restored, a rescan
+      will verify that all dependent records are intact.
+    </p>
+
+    <!-- FAQ -->
+    <h2 id="faq">Frequently asked questions</h2>
+
+    <h3>Is a DNS lookup failure always a real problem?</h3>
+    <p>
+      Not always. A single failed lookup can be caused by a temporary resolver timeout or network
+      issue. If the failure persists across multiple resolvers (8.8.8.8 and 1.1.1.1) and repeated
+      tests, it indicates a real configuration problem that needs to be fixed.
+    </p>
+
+    <h3>Can a DNS failure affect my email?</h3>
+    <p>
+      Yes. Email depends on DNS for MX records (where to deliver mail),
+      <a href="/domain-health/spf-record-missing.html">SPF records</a> (sender verification), and
+      <a href="/domain-health/no-dmarc-policy.html">DMARC records</a> (policy enforcement). When DNS
+      is down, all of these fail. Incoming email bounces, and outgoing email loses authentication.
+    </p>
+
+    <h3>How long does DNS propagation take?</h3>
+    <p>
+      Most DNS changes propagate within a few minutes to a few hours. Full global propagation can take
+      up to 48 hours in rare cases. If you recently changed nameservers, allow time before concluding
+      there is a problem.
+    </p>
+
+    <h3>My website is not loading. Is it definitely DNS?</h3>
+    <p>
+      Not necessarily. If your browser shows "server not found" or "DNS_PROBE_FINISHED_NXDOMAIN", it
+      is a DNS issue. If it shows a timeout, 502, or 503 error, the DNS is working but your server is
+      not responding. Run <span class="code-inline">dig yourdomain.com @8.8.8.8</span> to check.
+      If you get an IP address in the response, DNS is working and the problem is elsewhere.
+    </p>
+
+    <!-- Related issues -->
+    <h2 id="related-issues">Related issues</h2>
+    <p>DNS failures often cause or mask these related domain health issues:</p>
+    <div class="related-grid">
+      <a href="/domain-health/no-a-record.html" class="related-card">
+        <div class="rc-title">No A record</div>
+        <div class="rc-desc">If DNS resolution works but there is no A record, your domain will not resolve to an IP address.</div>
+      </a>
+      <a href="/domain-health/spf-record-missing.html" class="related-card">
+        <div class="rc-title">SPF record missing</div>
+        <div class="rc-desc">DNS failures prevent SPF lookups. When DNS is restored, check that your SPF record is intact.</div>
+      </a>
+      <a href="/domain-health/no-dmarc-policy.html" class="related-card">
+        <div class="rc-title">No DMARC policy</div>
+        <div class="rc-desc">DMARC records live in DNS. A DNS failure means DMARC cannot be checked by email providers.</div>
+      </a>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <p>Scan your domain with 1Pane to confirm DNS resolution and check for related issues in one place.</p>
+      <a href="/dashboard" class="cta-button">Scan your domain with 1Pane</a>
+    </div>
+
+    </article>
+
+    <div class="footer">
+      <a href="/domain-health/index.html">Domain Health Guides</a> &middot; <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>

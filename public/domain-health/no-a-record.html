@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No A Record: What It Means and How to Fix It | 1Pane</title>
+  <meta name="description" content="Your domain has no A record and cannot resolve to an IP address. Visitors will see 'server not found' errors. Learn what an A record is, how to diagnose the issue, and how to add one correctly.">
+  <link rel="canonical" href="https://1pane.com/domain-health/no-a-record.html">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="No A Record: What It Means and How to Fix It">
+  <meta property="og:description" content="Your domain has no A record and cannot resolve to an IP address. Learn how to diagnose and fix this.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://1pane.com/domain-health/no-a-record.html">
+
+  <!-- Structured data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://1pane.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Domain Health", "item": "https://1pane.com/domain-health/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "No A Record" }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does 'no A record' mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It means your domain does not have a DNS record that maps it to an IPv4 address. Without an A record (or a CNAME that resolves to one), browsers cannot find your server and visitors will see 'server not found' errors."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between an A record and a CNAME?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An A record maps a domain directly to an IPv4 address (e.g. 203.0.113.50). A CNAME maps a domain to another hostname (e.g. mysite.netlify.app), which then resolves to an IP via its own A record. Both achieve the same end result, but CNAMEs add an extra lookup step and cannot be used at the root domain with all DNS providers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can my email work without an A record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Email delivery relies on MX records, not A records. Your domain can receive email without an A record. However, webmail login pages and any web-based email interface hosted on your domain will be inaccessible."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need an A record if I use Cloudflare or a CDN?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. If you use Cloudflare with proxying enabled, you still need an A record pointing to your origin server. Cloudflare intercepts the traffic, but the A record must exist for DNS resolution to work. Some CDN providers use CNAME records instead."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I check if my domain has an A record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run 'dig yourdomain.com A' in a terminal. If the ANSWER section is empty or the command returns NXDOMAIN, there is no A record. You can also use online tools like Google Admin Toolbox Dig or MXToolbox."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "My A record is correct but the site still does not load. Why?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "If the A record resolves correctly but the site does not load, the issue is with the server, not DNS. Common causes include the server being offline, a firewall blocking traffic, or the web server not configured to respond on port 80 or 443. Check your server logs and hosting dashboard."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to add a missing A record to your domain",
+    "description": "Step-by-step guide to diagnosing and fixing a missing A record on your domain.",
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-22",
+    "totalTime": "PT10M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Confirm the A record is missing",
+        "text": "Run 'dig yourdomain.com A @8.8.8.8' to verify that no A record exists. Check for a CNAME record as well."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Identify your server IP address",
+        "text": "Find the IPv4 address of your web server or hosting provider. This is usually available in your hosting control panel."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Log in to your DNS provider",
+        "text": "Access your DNS management dashboard at your DNS provider (Cloudflare, Route 53, GoDaddy, Namecheap, etc.)."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add the A record",
+        "text": "Create a new A record with Host set to @ (root domain), Type set to A, Value set to your server's IPv4 address, and TTL set to 3600."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add a www subdomain record",
+        "text": "Add a CNAME record for 'www' pointing to your root domain, or add a second A record for 'www' pointing to the same IP address."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Verify the record",
+        "text": "Run 'dig yourdomain.com A @8.8.8.8' again. You should now see your IP address in the ANSWER section. Allow up to 48 hours for full propagation."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fafafa;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: #999; margin-bottom: 24px; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a2e; text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .updated-date { font-size: 13px; color: #999; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 20px; line-height: 1.3; }
+    .lead { font-size: 17px; color: #555; margin-bottom: 12px; }
+    .fix-summary {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e40af;
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+    }
+    h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 14px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 16px; color: #333; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #333; }
+    li { margin-bottom: 8px; }
+    a { color: #1e40af; }
+    a:hover { text-decoration: none; }
+    .code-block {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-inline {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+    .callout {
+      background: #f0f7ff;
+      border-left: 3px solid #3b82f6;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    .callout p { margin-bottom: 0; color: #1e40af; }
+    .callout-warn {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+    }
+    .callout-warn p { color: #92400e; }
+
+    /* Quick fix box */
+    .quick-fix {
+      background: #fff;
+      border: 2px solid #183D9C;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0 40px;
+    }
+    .quick-fix-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .quick-fix-badge {
+      background: #183D9C;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quick-fix-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    /* Visual diagrams */
+    .diagram {
+      margin: 28px 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .diagram-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      padding: 14px 20px 0;
+    }
+    .diagram-content {
+      padding: 20px;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+    }
+    .flow-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .flow-icon-blue { background: #eff6ff; color: #1e40af; }
+    .flow-icon-green { background: #f0fdf4; color: #16a34a; }
+    .flow-icon-red { background: #fef2f2; color: #dc2626; }
+    .flow-text { font-size: 14px; color: #333; }
+    .flow-text strong { color: #1a1a2e; }
+    .flow-arrow { color: #ccc; font-size: 18px; text-align: center; width: 100%; }
+    .flow-fail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .simple-box ul { margin-bottom: 0; }
+    .simple-box li { font-size: 15px; }
+
+    /* Comparison cards (without vs with) */
+    .versus-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    @media (min-width: 540px) {
+      .versus-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .versus-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+    }
+    .versus-card-bad { background: #fef2f2; border-color: #fecaca; }
+    .versus-card-good { background: #f0fdf4; border-color: #bbf7d0; }
+    .versus-card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; }
+    .versus-card ul { margin-bottom: 0; padding-left: 20px; }
+    .versus-card li { font-size: 14px; margin-bottom: 6px; }
+    .versus-card-bad h3 { color: #991b1b; }
+    .versus-card-bad li { color: #7f1d1d; }
+    .versus-card-good h3 { color: #166534; }
+    .versus-card-good li { color: #14532d; }
+
+    /* A record vs CNAME comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .compare-table th, .compare-table td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .compare-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #666;
+    }
+    .compare-table td { color: #333; }
+    .compare-table tr:last-child td { border-bottom: none; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 32px 0 40px;
+    }
+    .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: #1e40af; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* DNS record example */
+    .record-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .record-table th, .record-table td {
+      text-align: left;
+      padding: 8px 12px;
+      border: 1px solid #e5e5e5;
+    }
+    .record-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 13px;
+      color: #666;
+    }
+    .record-table td { color: #333; font-family: "SF Mono", SFMono-Regular, Consolas, monospace; font-size: 13px; }
+
+    /* Related issues */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (min-width: 540px) {
+      .related-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .related-card {
+      display: block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .related-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .related-card .rc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .related-card .rc-desc { font-size: 13px; color: #666; }
+
+    .cta-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .cta-box p { color: #555; margin-bottom: 16px; }
+    .cta-button {
+      display: inline-block;
+      background: #183D9C;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .cta-button:hover { background: #153580; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999; }
+    .footer a { color: #666; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 16px 60px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 19px; margin-top: 36px; }
+      .quick-fix { padding: 16px; }
+      .flow-step { gap: 8px; }
+      .versus-card { padding: 16px; }
+      .compare-table th, .compare-table td { padding: 8px 10px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">/</span>
+      <a href="/domain-health/index.html">Domain Health</a>
+      <span class="sep">/</span>
+      <span>No A Record</span>
+    </nav>
+
+    <article>
+    <p class="updated-date">Last updated: <time datetime="2026-03-22">22 March 2026</time></p>
+
+    <h1>No A record: what it means and how to fix it</h1>
+
+    <!-- Featured snippet target -->
+    <p class="lead">
+      Your domain does not have an A record, which means it cannot resolve to an IPv4 address.
+      Visitors trying to reach your website will see "server not found" in their browser. Your site
+      is effectively offline. An A record is one of the most fundamental DNS records, and without
+      one (or a CNAME that resolves to one), there is no address for browsers to connect to.
+    </p>
+
+    <div class="fix-summary">
+      <strong>Fix:</strong> Log in to your DNS provider, add an A record with Host set to
+      <span class="code-inline">@</span>, Type set to <span class="code-inline">A</span>, and
+      Value set to your server's IPv4 address. Verify with
+      <span class="code-inline">dig yourdomain.com A @8.8.8.8</span>.
+    </div>
+
+    <!-- Table of contents -->
+    <nav class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#quick-fix">Quick fix (10 minutes)</a></li>
+        <li><a href="#what-is-a-record">What is an A record</a></li>
+        <li><a href="#how-it-works">How DNS uses A records to load your site</a></li>
+        <li><a href="#simple-explanation">How to think about this (simple)</a></li>
+        <li><a href="#is-this-your-issue">How to tell if this is your issue</a></li>
+        <li><a href="#without-vs-with">Without an A record vs with one</a></li>
+        <li><a href="#why-it-matters">Why this matters</a></li>
+        <li><a href="#how-to-fix">How to fix it properly</a></li>
+        <li><a href="#a-vs-cname">A record vs CNAME: which one do you need?</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+        <li><a href="#how-1pane-detects">How 1Pane detects this</a></li>
+        <li><a href="#faq">Frequently asked questions</a></li>
+        <li><a href="#related-issues">Related issues</a></li>
+      </ul>
+    </nav>
+
+    <!-- Quick fix -->
+    <div class="quick-fix" id="quick-fix">
+      <div class="quick-fix-header">
+        <span class="quick-fix-badge">Quick fix</span>
+        <span class="quick-fix-title">Add an A record in 10 minutes</span>
+      </div>
+      <ol>
+        <li><strong>Confirm the record is missing.</strong> Run this command to check:</li>
+      </ol>
+      <div class="code-block">dig yourdomain.com A @8.8.8.8</div>
+      <p style="color: #555; font-size: 14px; margin-bottom: 12px;">
+        If the ANSWER section is empty, there is no A record.
+      </p>
+      <ol start="2">
+        <li><strong>Find your server's IP address.</strong> Check your hosting provider's dashboard for the IPv4 address of your web server.</li>
+        <li><strong>Log in to your DNS provider</strong> (Cloudflare, Route 53, GoDaddy, Namecheap, or similar).</li>
+        <li><strong>Add a new A record</strong> with these settings:</li>
+      </ol>
+      <table class="record-table">
+        <tr><th>Host / Name</th><th>Type</th><th>Value</th><th>TTL</th></tr>
+        <tr><td>@</td><td>A</td><td>203.0.113.50</td><td>3600</td></tr>
+      </table>
+      <p style="color: #555; font-size: 13px; margin-bottom: 12px;">
+        Replace 203.0.113.50 with your actual server IP address.
+      </p>
+      <ol start="5">
+        <li><strong>Verify the record is live:</strong></li>
+      </ol>
+      <div class="code-block">dig yourdomain.com A @8.8.8.8</div>
+      <p style="margin-bottom:0; color: #555; font-size: 14px;">
+        You should now see your IP address in the ANSWER section. If you use a hosting platform like
+        Vercel or Netlify, you may need a CNAME record instead. Check your provider's documentation.
+      </p>
+    </div>
+
+    <!-- What is an A record -->
+    <h2 id="what-is-a-record">What is an A record</h2>
+    <p>
+      An A record is the most fundamental DNS record type. It maps your domain name to an IPv4
+      address, telling browsers and other clients exactly where to find your server. When someone
+      types your domain into a browser, the first thing that happens is a DNS lookup for the A record.
+    </p>
+    <p>
+      The "A" stands for "Address". Without this record, the
+      <a href="/domain-health/dns-lookup-failed.html">DNS lookup</a> will succeed (the domain exists
+      and nameservers respond), but there is no IP address to connect to. The result is the same as
+      if the server did not exist.
+    </p>
+
+    <!-- How DNS uses A records -->
+    <h2 id="how-it-works">How DNS uses A records to load your site</h2>
+    <p>
+      When a visitor types your domain into their browser, a chain of lookups occurs. The A record
+      is the final, critical link in that chain.
+    </p>
+
+    <div class="diagram" role="figure" aria-label="Flow diagram showing how a browser resolves a domain name to an IP address using the A record">
+      <div class="diagram-title">Domain resolution flow</div>
+      <div class="diagram-content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#127760;</div>
+            <div class="flow-text"><strong>Visitor</strong> types yourdomain.com into the browser</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128269;</div>
+            <div class="flow-text"><strong>DNS resolver</strong> queries for the A record of yourdomain.com</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-blue">&#128451;</div>
+            <div class="flow-text"><strong>Authoritative nameserver</strong> looks up the A record in your DNS zone</div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#10007;</div>
+            <div class="flow-text"><strong>No A record found.</strong> The nameserver returns an empty answer. <span class="flow-fail-label">Fails here</span></div>
+          </div>
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-step">
+            <div class="flow-icon flow-icon-red">&#9888;</div>
+            <div class="flow-text"><strong>Browser shows "server not found".</strong> There is no IP address to connect to.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      Compare this with a working setup: the nameserver returns an IP address (e.g. 203.0.113.50),
+      the browser connects to that address, and the website loads. Without the A record, this chain
+      breaks at the DNS level before a connection is even attempted.
+    </p>
+
+    <!-- Simple explanation -->
+    <h2 id="simple-explanation">How to think about this (simple)</h2>
+    <p>If you are not familiar with DNS, here is the simplest way to understand this issue:</p>
+    <div class="simple-box">
+      <ul>
+        <li>Your domain name is like a <strong>street name</strong>. The A record is the <strong>house number</strong>.</li>
+        <li>Without a house number, the postman knows the street exists but has <strong>nowhere to deliver</strong>.</li>
+        <li>Browsers work the same way. They know your domain name, but without the A record, they have <strong>no address to connect to</strong>.</li>
+        <li>Adding an A record is like putting the house number on the door. Once it is there, traffic flows normally.</li>
+      </ul>
+    </div>
+    <p>
+      This is different from a <a href="/domain-health/dns-lookup-failed.html">DNS lookup failure</a>,
+      where the entire DNS system is unreachable. With a missing A record, DNS works, but there is
+      simply no address record to return.
+    </p>
+
+    <!-- How to tell if this is your issue -->
+    <h2 id="is-this-your-issue">How to tell if this is your issue</h2>
+    <p>These are common signs that a missing A record is the cause of your problem:</p>
+    <ul>
+      <li><strong>Your website shows "server not found".</strong> The browser cannot resolve the domain to an IP address. This is different from a timeout or 500 error, which mean the server was found but could not respond.</li>
+      <li><strong>Your domain was flagged for having no A record.</strong> A domain health scan or DNS audit reported a missing A record specifically.</li>
+      <li><strong>You recently migrated DNS providers.</strong> If you switched from one DNS provider to another and forgot to recreate the A record at the new provider, the record will be missing.</li>
+      <li><strong>A <span class="code-inline">dig</span> query returns an empty answer.</strong> Running <span class="code-inline">dig yourdomain.com A</span> returns a response but the ANSWER section is empty (no IP address).</li>
+      <li><strong>Email still works but the website does not.</strong> Email uses MX records, not A records. If email is fine but the website is down, a missing A record is a likely cause.</li>
+    </ul>
+    <div class="callout">
+      <p>
+        <strong>Quick check:</strong> Run <span class="code-inline">dig yourdomain.com A @8.8.8.8</span>.
+        If the ANSWER section is empty, you have no A record. If the command returns SERVFAIL or a timeout,
+        the issue is a <a href="/domain-health/dns-lookup-failed.html">DNS lookup failure</a>, not a missing A record.
+      </p>
+    </div>
+
+    <!-- Without vs with -->
+    <h2 id="without-vs-with">Without an A record vs with one</h2>
+    <div class="versus-grid">
+      <div class="versus-card versus-card-bad">
+        <h3>Without an A record</h3>
+        <ul>
+          <li>Website is completely unreachable</li>
+          <li>Browser shows "server not found"</li>
+          <li>APIs and services on the domain fail</li>
+          <li>Search engines cannot crawl your site</li>
+          <li>SSL certificates cannot be validated</li>
+        </ul>
+      </div>
+      <div class="versus-card versus-card-good">
+        <h3>With an A record</h3>
+        <ul>
+          <li>Domain resolves to your server's IP</li>
+          <li>Website loads normally for visitors</li>
+          <li>APIs and services are accessible</li>
+          <li>Search engines can index your pages</li>
+          <li>SSL/TLS works as expected</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Why it matters -->
+    <h2 id="why-it-matters">Why this matters</h2>
+    <p>
+      A missing A record does not just make your website unavailable. It has cascading effects
+      across your entire online presence:
+    </p>
+    <ul>
+      <li><strong>Website completely offline.</strong> This is not a degraded experience. Visitors cannot reach your site at all. There is no IP address for the browser to connect to, so the connection is never attempted.</li>
+      <li><strong>API and service failures.</strong> Any application, webhook, or third-party integration that connects to your domain by name will fail. This includes payment callbacks, CRM integrations, and monitoring endpoints.</li>
+      <li><strong>SEO damage.</strong> Search engines cannot crawl pages they cannot reach. If the A record is missing for more than a few days, Google may begin deindexing your pages. Recovering rankings after a prolonged outage can take weeks.</li>
+      <li><strong>SSL certificate issues.</strong> Certificate authorities need to reach your domain to issue or renew SSL certificates. A missing A record will cause certificate renewals to fail, compounding the problem when the record is restored.</li>
+      <li><strong>Subdomains may also be affected.</strong> If subdomains (like www, app, or api) rely on the root domain's A record through CNAME chains, they will also stop resolving.</li>
+      <li><strong>Email may still work.</strong> Email delivery uses MX records, not A records. Your domain can receive email without an A record. However, webmail login pages hosted on your domain will be inaccessible.</li>
+    </ul>
+
+    <!-- How to fix it properly -->
+    <h2 id="how-to-fix">How to fix it properly</h2>
+    <p>Work through these steps in order. The right approach depends on how your site is hosted.</p>
+
+    <h3>Step 1: Confirm the A record is truly missing</h3>
+    <p>
+      Before making changes, verify that the A record is actually missing and not just delayed by propagation:
+    </p>
+    <div class="code-block"><span class="comment"># Check for A record</span>
+dig yourdomain.com A @8.8.8.8
+
+<span class="comment"># Also check for a CNAME (some setups use CNAME instead)</span>
+dig yourdomain.com CNAME @8.8.8.8</div>
+    <p>
+      If neither an A nor a CNAME record exists, proceed to step 2. If a CNAME exists, the issue
+      may be with the target hostname it points to, not a missing A record.
+    </p>
+
+    <h3>Step 2: Identify your server's IP address</h3>
+    <p>
+      You need the IPv4 address of your web server or hosting provider. Where to find it depends on
+      your setup:
+    </p>
+    <ul>
+      <li><strong>VPS or dedicated server</strong> (DigitalOcean, Linode, AWS EC2): the IP is shown in your server's dashboard.</li>
+      <li><strong>Cloudflare</strong> (proxied): create the A record pointing to your origin server IP. Cloudflare handles the rest.</li>
+      <li><strong>Platform hosting</strong> (Vercel, Netlify, Render): these providers typically use CNAME records instead of A records. Check their documentation for the correct hostname value.</li>
+      <li><strong>Shared hosting</strong> (cPanel, Plesk): check the hosting dashboard or contact support for the correct IP address.</li>
+    </ul>
+
+    <h3>Step 3: Log in to your DNS provider</h3>
+    <p>
+      Access the DNS management panel for your domain. This might be at your registrar (GoDaddy,
+      Namecheap) or a dedicated DNS provider (Cloudflare, Route 53, DNS Made Easy). Make sure you
+      are editing the correct domain.
+    </p>
+
+    <h3>Step 4: Add the A record</h3>
+    <p>Create a new DNS record with these settings:</p>
+    <table class="record-table">
+      <tr><th>Field</th><th>Value</th></tr>
+      <tr><td>Host / Name</td><td>@</td></tr>
+      <tr><td>Type</td><td>A</td></tr>
+      <tr><td>Value / Points to</td><td>Your server's IPv4 address</td></tr>
+      <tr><td>TTL</td><td>3600 (or Auto)</td></tr>
+    </table>
+    <p>
+      The <span class="code-inline">@</span> symbol represents the root domain (e.g. yourdomain.com
+      without any subdomain prefix).
+    </p>
+
+    <div class="callout-warn callout">
+      <p>
+        <strong>Important:</strong> If you use a platform like Vercel or Netlify, do not add an A record.
+        Follow their documentation to add a CNAME record instead. Adding the wrong record type will
+        cause your site to not load correctly.
+      </p>
+    </div>
+
+    <h3>Step 5: Add a www record</h3>
+    <p>
+      Many visitors will type www.yourdomain.com. Add a second record to handle this:
+    </p>
+    <table class="record-table">
+      <tr><th>Host / Name</th><th>Type</th><th>Value</th></tr>
+      <tr><td>www</td><td>CNAME</td><td>yourdomain.com</td></tr>
+    </table>
+    <p>
+      This ensures www.yourdomain.com resolves by following the CNAME to your root domain's A record.
+    </p>
+
+    <h3>Step 6: Verify the record is working</h3>
+    <p>
+      Wait a few minutes, then test:
+    </p>
+    <div class="code-block"><span class="comment"># Verify the A record</span>
+dig yourdomain.com A @8.8.8.8
+
+<span class="comment"># Expected: ANSWER section shows your IP address</span>
+<span class="comment"># yourdomain.com.  3600  IN  A  203.0.113.50</span></div>
+    <p>
+      If you see your IP address in the ANSWER section, the record is live. Most DNS changes take
+      effect within minutes, but full global propagation can take up to 48 hours. If the record does
+      not appear after an hour, double-check that your nameservers at the registrar match your DNS
+      provider.
+    </p>
+
+    <!-- A record vs CNAME -->
+    <h2 id="a-vs-cname">A record vs CNAME: which one do you need?</h2>
+    <p>
+      Both A records and CNAME records can make your domain resolve to a server. They work differently,
+      and choosing the wrong one is a common source of confusion.
+    </p>
+
+    <div class="diagram" role="figure" aria-label="Table comparing A records and CNAME records">
+      <div class="diagram-content">
+        <table class="compare-table">
+          <tr>
+            <th></th>
+            <th>A Record</th>
+            <th>CNAME Record</th>
+          </tr>
+          <tr>
+            <td><strong>Points to</strong></td>
+            <td>An IPv4 address (e.g. 203.0.113.50)</td>
+            <td>A hostname (e.g. mysite.netlify.app)</td>
+          </tr>
+          <tr>
+            <td><strong>Lookup steps</strong></td>
+            <td>One (direct to IP)</td>
+            <td>Two or more (hostname, then its A record)</td>
+          </tr>
+          <tr>
+            <td><strong>Root domain</strong></td>
+            <td>Works at the root (@)</td>
+            <td>Not supported by all providers at root</td>
+          </tr>
+          <tr>
+            <td><strong>IP changes</strong></td>
+            <td>Must be updated manually</td>
+            <td>Updates automatically (follows target)</td>
+          </tr>
+          <tr>
+            <td><strong>Best for</strong></td>
+            <td>Servers with static IPs</td>
+            <td>Platform hosting (Vercel, Netlify, Heroku)</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <p><strong>When to use an A record:</strong></p>
+    <ul>
+      <li>You have a server with a fixed IP address (VPS, dedicated, EC2)</li>
+      <li>You need a record at the root domain and your provider does not support CNAME flattening</li>
+      <li>You are behind Cloudflare (set the A record to your origin IP, Cloudflare proxies automatically)</li>
+    </ul>
+
+    <p><strong>When to use a CNAME instead:</strong></p>
+    <ul>
+      <li>Your hosting provider gives you a hostname, not an IP (e.g. Vercel, Netlify, Render, Heroku)</li>
+      <li>You want the record to automatically follow IP changes at the target</li>
+      <li>You are setting up subdomains (www, app, api) that should follow the root domain</li>
+    </ul>
+
+    <div class="callout">
+      <p>
+        <strong>CNAME at the root domain:</strong> Some DNS providers (like Cloudflare and Route 53) support
+        "CNAME flattening", which lets you use a CNAME at the root domain. If your provider does not support
+        this, you must use an A record at the root.
+      </p>
+    </div>
+
+    <!-- Common mistakes -->
+    <h2 id="common-mistakes">Common mistakes</h2>
+    <ul>
+      <li>
+        <strong>Wrong IP address.</strong> Pointing to an old or incorrect IP means the domain resolves
+        but leads to the wrong server (or nowhere). Double-check the address with your hosting provider.
+      </li>
+      <li>
+        <strong>CNAME at the root without flattening.</strong> Some DNS providers do not allow a CNAME at
+        the root domain because it conflicts with other record types like MX and TXT. Use an A record at
+        the root, or switch to a provider that supports CNAME flattening (Cloudflare, Route 53).
+      </li>
+      <li>
+        <strong>Forgetting the www subdomain.</strong> Adding an A record for <span class="code-inline">@</span>
+        but not for <span class="code-inline">www</span> means www.yourdomain.com will not resolve. Add a
+        CNAME for www pointing to the root domain.
+      </li>
+      <li>
+        <strong>Accidentally deleted during DNS migration.</strong> When moving DNS providers, A records
+        can be lost if the zone is not fully recreated. Always export your DNS zone before migrating, and
+        verify all records at the new provider.
+      </li>
+      <li>
+        <strong>Using a CNAME when an A record is needed.</strong> If your hosting provider gives you an
+        IP address (not a hostname), you need an A record. Adding a CNAME with an IP address as the value
+        will not work.
+      </li>
+      <li>
+        <strong>Propagation confusion.</strong> After adding an A record, it can take minutes to hours to
+        propagate globally. Test with <span class="code-inline">dig @8.8.8.8</span> (bypasses cache) before
+        concluding the record is not working.
+      </li>
+    </ul>
+
+    <!-- How 1Pane detects this -->
+    <h2 id="how-1pane-detects">How 1Pane detects this</h2>
+    <p>
+      During a domain health scan, 1Pane queries for A records at your root domain. If the
+      <a href="/domain-health/dns-lookup-failed.html">DNS lookup</a> succeeds but the response
+      contains no A record and no CNAME record, the scan flags this as a critical issue. This
+      distinguishes it from a DNS lookup failure (where the entire lookup fails) and from a working
+      setup that uses CNAME instead of A records.
+    </p>
+    <p>
+      1Pane also checks for related records that may be affected, including
+      <a href="/domain-health/spf-record-missing.html">SPF</a> and
+      <a href="/domain-health/no-dmarc-policy.html">DMARC</a> records. A missing A record is
+      reported as a critical issue because it means the website is completely unreachable.
+    </p>
+
+    <!-- FAQ -->
+    <h2 id="faq">Frequently asked questions</h2>
+
+    <h3>What is the difference between an A record and a CNAME?</h3>
+    <p>
+      An A record maps your domain directly to an IPv4 address (e.g. 203.0.113.50). A CNAME maps
+      your domain to another hostname (e.g. mysite.netlify.app), which then resolves to an IP via
+      its own A record. Both achieve the same result, but CNAMEs add an extra lookup step and cannot
+      always be used at the root domain.
+    </p>
+
+    <h3>Can my email work without an A record?</h3>
+    <p>
+      Yes. Email delivery relies on MX records, not A records. Your domain can send and receive
+      email without an A record. However, if your webmail login page is hosted on the domain, it
+      will be inaccessible without an A record.
+    </p>
+
+    <h3>Do I need an A record if I use Cloudflare?</h3>
+    <p>
+      Yes. Even with Cloudflare proxying enabled, you need an A record pointing to your origin
+      server. Cloudflare intercepts the traffic and routes it through its network, but the A
+      record must exist in your Cloudflare DNS zone for this to work.
+    </p>
+
+    <h3>My A record is correct but my site still does not load. What is wrong?</h3>
+    <p>
+      If the A record resolves correctly but the site does not load, the issue is with the server,
+      not DNS. Common causes include the server being offline, a firewall blocking port 80/443,
+      the web server software not running, or an expired SSL certificate. Check your server logs
+      and hosting dashboard for errors.
+    </p>
+
+    <!-- Related issues -->
+    <h2 id="related-issues">Related issues</h2>
+    <p>A missing A record is often found alongside these other domain health issues:</p>
+    <div class="related-grid">
+      <a href="/domain-health/dns-lookup-failed.html" class="related-card">
+        <div class="rc-title">DNS lookup failed</div>
+        <div class="rc-desc">If the entire DNS lookup fails, no records (including A records) can be retrieved.</div>
+      </a>
+      <a href="/domain-health/spf-record-missing.html" class="related-card">
+        <div class="rc-title">SPF record missing</div>
+        <div class="rc-desc">Without an SPF record, receiving servers cannot verify that email from your domain is legitimate.</div>
+      </a>
+      <a href="/domain-health/no-dmarc-policy.html" class="related-card">
+        <div class="rc-title">No DMARC policy</div>
+        <div class="rc-desc">A missing DMARC policy leaves your domain vulnerable to email spoofing.</div>
+      </a>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <p>Scan your domain with 1Pane to check for missing A records, DNS issues, and email authentication problems in one place.</p>
+      <a href="/dashboard" class="cta-button">Scan your domain with 1Pane</a>
+    </div>
+
+    </article>
+
+    <div class="footer">
+      <a href="/domain-health/index.html">Domain Health Guides</a> &middot; <a href="/">1Pane</a>
+    </div>
+  </div>
+</body>
+</html>
